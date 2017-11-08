@@ -5,7 +5,7 @@ import json
 if __name__ == '__main__':
     sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
-    server_address = ('localhost', 2134)
+    server_address = ('localhost', 3001)
     print('Comenzando en {} puerto {}'.format(*server_address))
     sock.bind(server_address)
 

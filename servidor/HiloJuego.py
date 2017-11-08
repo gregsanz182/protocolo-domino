@@ -37,8 +37,10 @@ class HiloJuego(threading.Thread):
                 if conexion:
                     conexion.settimeout(5)
                     mensaje = conexion.recv(4096)
+                    print('{} intenta conectarse', direccion_cliente)
                     mensaje_json = json.loads(mensaje.decode('utf-8'))
                     if mensaje_json['indentificador'] == self.identificadorProtocolo and mensaje_json.get('nombre_jugador'):
+                        print("El jugador {0} se ha conectado bajo la direccion {1}".format(mensaje_json['nombre_jugador'], direccion_cliente))
                         self.jugadores.append(Jugador(mensaje_json['nombre_jugador'], direccion_cliente, conexion))
             except TimeoutError:
                 pass

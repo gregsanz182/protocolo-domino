@@ -5,7 +5,7 @@ import json
 if __name__ == '__main__':
     sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
-    server_address = ('localhost', 2134)
+    server_address = ('localhost', 3001)
     print('Conectandose a {} port {}'.format(*server_address))
     sock.connect(server_address)
 
@@ -19,17 +19,12 @@ if __name__ == '__main__':
         print('Enviando {!r}'.format(message))
         sock.sendall(message)
 
-        amount_received = 0
-        amount_expected = len(message)
-        cad = ''
-
-        while amount_received < amount_expected:
-            data = sock.recv(2024)
-            amount_received += len(data)
-            cad = cad+data.decode('utf-8')
+        data = sock.recv(4096)
 
         mem = json.loads(cad)
         print(mem)
+        while True:
+            pass
 
     finally:
         print('Cerrando Socket')

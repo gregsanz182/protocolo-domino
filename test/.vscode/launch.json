@@ -1,0 +1,40 @@
+{
+    // Utilizar IntelliSense para aprender acerca de los posibles atributos.
+    // Mantenga el puntero para ver las descripciones de los existentes atributos 
+    // Para más información, visite: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "TCP Server",
+            "type": "python",
+            "request": "launch",
+            "stopOnEntry": true,
+            "pythonPath": "${config:python.pythonPath}",
+            "program": "${workspaceRoot}/tcp/server.py",
+            "cwd": "${workspaceRoot}",
+            "env": {},
+            "envFile": "${workspaceRoot}/.env",
+            "debugOptions": [
+                "WaitOnAbnormalExit",
+                "WaitOnNormalExit",
+                "RedirectOutput"
+            ]
+        },
+        {
+            "name": "UDP Server",
+            "type": "python",
+            "request": "launch",
+            "stopOnEntry": true,
+            "pythonPath": "${config:python.pythonPath}",
+            "program": "${workspaceRoot}/udp/server.py",
+            "cwd": "${workspaceRoot}",
+            "env": {},
+            "envFile": "${workspaceRoot}/.env",
+            "debugOptions": [
+                "WaitOnAbnormalExit",
+                "WaitOnNormalExit",
+                "RedirectOutput"
+            ]
+        }
+    ]
+}

@@ -7,18 +7,19 @@ import json
 import sys
 
 class conection:
-    ip
-    port
-    sock
-    def __init__(self, UDP_IP, UDP_port):
-        self.ip = UDP_IP
-        self.port = UDP_port
+    def __init__(self, ip, port):
+        self.ip = ip
+        self.port = port
         try:
-            sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+            self.sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         except socket.error:
-            print('el Socket no se abrio correctamente...')
+            print('error...')
             sys.exit()
     def conect(self):
-        self.mensaje = format(json.dump({"identificador": "DOMINOCOMUNICACIONES1"}))
-        while true:
-            sock.sendto(mensaje,(self.ip,self.port))
+        self.mensaje = json.dumps({"identificador": "DOMINOCOMUNICACIONES1"})
+        while True:
+            self.sock.sendto(self.mensaje, (self.ip, self.port))
+
+if __name__ == '__main__':
+    s = conection('localhost',3001)
+    s.conect()

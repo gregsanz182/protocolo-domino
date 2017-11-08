@@ -27,7 +27,6 @@ if __name__ == '__main__':
         ]
     }
     message = json.dumps(men).encode('utf-8')
-
     try:
         print('Enviando {!r}'.format(message))
         sent = sock.sendto(message, server_address)

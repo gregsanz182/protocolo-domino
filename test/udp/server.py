@@ -3,6 +3,7 @@ import socket
 
 if __name__ == '__main__':
     sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    sock.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)
     server_adress = ('localhost', 3001)
     print('Comenzando en {} port {}'.format(*server_adress))
     sock.bind(server_adress)

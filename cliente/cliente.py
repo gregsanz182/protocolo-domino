@@ -11,37 +11,39 @@ import time
 #----------------------------------------REQUEST----------------------------------------------------
 class RequestServer(threading.Thread):
 
-    def __init__(self, conection, sock):
+    def __init__(self, conection):
         super().__init__()
+        self.sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        self.sock.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)
         self.conection = conection
-        self.sock = sock
         self.mensaje_json = {
-            "identificador": "DOMINOCOMUNICACIONES1"
+            "identificador": "DOMINOCOMUNICACIONESI"
         }
 
     def run(self):
         while True:
             self.mensaje = json.dumps(self.mensaje_json).encode('utf-8')
-            sock.sendto(self.mensaje, self.conection)
+            self.sock.sendto(self.mensaje, self.conection)
             print('mensaje cliente: {}'.format(self.mensaje))
-            time.sleep(30)
+            time.sleep(2)
 
 #------------------------------------------REPLY--------------------------------------------------
 class ReplyServer(threading.Thread):
 
-    def __init__(self, sock):
+    def __init__(self):
         super().__init__()
-        self.sock = sock
+        self.sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        self.sock.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)
         self.mesas = []
-        self.ip_sever = []
-        self.cont = 0
+        self.ip_server = []
     
     def run(self):
         while True:
-            self.msj, self.ip_server[self.cont] = sock.recvfrom(4096)
-            self.mesas.append(json.loads(self.msj))
-            print('mensaje de repuesta {} desde el server {}'.format(mesas[self.cont],ip_server[self.cont]))
-            self.cont = self.cont + 1
+            self.msj, self.direc = self.sock.recvfrom(4096)
+            self.mesas.append(json.loads(self.msj).decode('utf-8'))
+            self.ip_server.append(self.direc)
+            print(self.mesas)
+            print(self.ip_server)
 
     def getMesas(self):
         return self.mesas
@@ -53,12 +55,11 @@ class ReplyServer(threading.Thread):
 if __name__ == '__main__':
     conection = ('127.255.255.255', 3001)
     try:
-        sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-        sock.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)
-        req = RequestServer(conection, sock)
-        #rep = ReplyServer(sock)
+        req = RequestServer(conection)
         req.start()
-        #rep.start()
+        time.sleep(2)
+        rep = ReplyServer()
+        rep.start()
         req.join()
     except socket.error:
         print('error en el socket...')

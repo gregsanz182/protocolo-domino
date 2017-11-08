@@ -24,7 +24,7 @@ class RequestServer(threading.Thread):
             self.mensaje = json.dumps(self.mensaje_json).encode('utf-8')
             sock.sendto(self.mensaje, self.conection)
             print('mensaje cliente: {}'.format(self.mensaje))
-            time.sleep(2000)
+            time.sleep(30)
 
 #------------------------------------------REPLY--------------------------------------------------
 class ReplyServer(threading.Thread):
@@ -51,7 +51,7 @@ class ReplyServer(threading.Thread):
 
 #--------------------------------------------MAIN-------------------------------------------------
 if __name__ == '__main__':
-    conection = ('127.255.255.255',3001)
+    conection = ('127.255.255.255', 3001)
     try:
         sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         sock.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)

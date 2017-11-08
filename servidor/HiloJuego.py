@@ -3,7 +3,7 @@ import json
 import socket
 import threading
 
-class hiloEscuchaTCP(threading.Thread):
+class HiloJuego(threading.Thread):
 
     def __init__(self):
         super().__init__()
@@ -17,5 +17,8 @@ class hiloEscuchaTCP(threading.Thread):
     def run(self):
         self.sockTCP.bind(self.TCPendpoint)
         self.sockTCP.listen(1)
+
+        while True:
+
 
 

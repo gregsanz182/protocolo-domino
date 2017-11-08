@@ -5,6 +5,7 @@
 import socket
 import json
 import sys
+import pthreading
 
 class conection:
     def __init__(self, ip, port):
@@ -13,10 +14,14 @@ class conection:
         try:
             self.sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         except socket.error:
-            print('error...')
+            print('error en el socket...')
             sys.exit()
+
     def conect(self):
-        self.mensaje = json.dumps({"identificador": "DOMINOCOMUNICACIONES1"})
+        self.mensaje_json = {
+            "identificador": "DOMINOCOMUNICACIONES1"
+        }
+        self.mensaje = json.dumps(self.mensaje_json).encode('utf-8')
         while True:
             self.sock.sendto(self.mensaje, (self.ip, self.port))
 

@@ -31,7 +31,7 @@ class HiloJuego(threading.Thread):
         self.sockTCP.setblocking(True)
         tiempo_comienzo = time.time()
 
-        while (tiempo_comienzo - time.time()) < 30 :
+        while (tiempo_comienzo - time.time()) < 30 and len(self.jugadores) >= 4:
             try:
                 conexion, direccion_cliente = self.sockTCP.accept()
                 if conexion:

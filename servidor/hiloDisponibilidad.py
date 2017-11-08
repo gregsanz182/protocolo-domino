@@ -4,7 +4,7 @@ import socket
 import threading
 import time
 
-class hiloDisponibilidad(threading.Thread):
+class HiloDisponibilidad(threading.Thread):
 
     def __init__(self):
         super().__init__()
@@ -27,7 +27,7 @@ class hiloDisponibilidad(threading.Thread):
                 print("Recibido desde {} por el puerto {}", *direccion)
                 msg = json.loads(mensaje.decode('utf-8'))
                 print(msg)
-                if msg['identificador'] == 'DOMINOCOMUNICACIONESI':
+                if msg.get('identificador') == 'DOMINOCOMUNICACIONESI':
                     self.mesaJson['sourceIP'] = direccion
                     self.sockUDP.sendto(json.dumps(self.mesaJson).encode('utf-8'), direccion)
 

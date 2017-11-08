@@ -3,7 +3,7 @@ import socket
 
 if __name__ == '__main__':
     sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-    server_adress = ('localhost', 2134)
+    server_adress = ('localhost', 3001)
     print('Comenzando en {} port {}'.format(*server_adress))
     sock.bind(server_adress)
 

@@ -74,6 +74,7 @@ class Cliente(threading.Thread):
         self.jugadas_pasadas = []
         self.jugadas_erroneas = []
         self.jugador_retirado = []
+        self.ronda = 1
         try:
             self.sockTCP.connect(self.ip_address)
             print('conexion exitosa con {} por el puerto {}'.format(*self.ip_address))
@@ -100,7 +101,7 @@ class Cliente(threading.Thread):
         print(resp)
         respuesta = json.loads(data.decode('utf-8'))
         if respuesta.get('identificador') == 'DOMINOCOMUNICACIONESI' and respuesta.get('multicast_ip'):
-            ipMulticast = respuesta['multicast_ip']
+            self.ipMulticast = respuesta['multicast_ip']
             data = self.sockTCP.recv(4096)
             fic = json.loads(data.decode('utf-8'))
             if fic.get('identificador') == 'DOMINOCOMUNICACIONESI' and fic.get('fichas'):
@@ -118,7 +119,7 @@ class Cliente(threading.Thread):
         bind_addr = '0.0.0.0'
         port = self.ip_address[1]
         sockUDP = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-        membership = socket.inet_aton(ipMmulticast) + socket.inet_aton(bind_addr)
+        membership = socket.inet_aton(self.ipMulticast) + socket.inet_aton(bind_addr)
         sockUDP.setsockopt(socket.IPPROTO_IP, socket.IP_ADD_MEMBERSHIP, membership)
         sockUDP.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         sockUDP.bind((bind_addr, port))
@@ -145,7 +146,7 @@ class Cliente(threading.Thread):
                             mensaje_TCP = {
                                 "identificador": "DOMINOCOMUNICACIONESI",
                                 "ficha": {
-                                    "token": "obtenerFicha()"
+                                    "token": "obtenerFicha(self.ronda)"
                                 },
                                 "punta": "obtenerpunta()"
                             }

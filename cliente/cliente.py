@@ -98,7 +98,7 @@ class Cliente(threading.Thread):
         print('enviado')
         print('esperando multicast...')
         data = self.sockTCP.recv(4096)
-        print(resp)
+        print(data)
         respuesta = json.loads(data.decode('utf-8'))
         if respuesta.get('identificador') == 'DOMINOCOMUNICACIONESI' and respuesta.get('multicast_ip'):
             self.ipMulticast = respuesta['multicast_ip']
@@ -108,8 +108,7 @@ class Cliente(threading.Thread):
                 for f in fic['fichas']:
                     self.fichas.append(f)
                     print(f)
-                while True:
-                    self.jugar()
+                self.jugar()
         else:
             print('No hay respuesta del servidor')
 
@@ -119,60 +118,70 @@ class Cliente(threading.Thread):
         bind_addr = '0.0.0.0'
         port = self.ip_address[1]
         sockUDP = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-        membership = socket.inet_aton(self.ipMulticast) + socket.inet_aton(bind_addr)
-        sockUDP.setsockopt(socket.IPPROTO_IP, socket.IP_ADD_MEMBERSHIP, membership)
         sockUDP.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-        sockUDP.bind((bind_addr, port))
-        data, address = sockUDP.recvfrom(4096)
-        mensaje = json.loads(data.decode(data))
-        if mensaje.get('identificador') == 'DOMINOCOMUNICACIONESI' and mensaje.get('jugador') and mensaje.get('tipo'):
-            try:
-                nombre_jugador = mensaje.get('jugador')
-                if len(self.jugadores) < 4:
-                    self.guardarJugador(nombre_jugador)
-                if nombre_jugador != self.nombre:
-                    mensaje_TCP = {
-                        "identificador": "DOMINOCOMUNICACIONESI",
-                        "jugador": self.nombre
-                    }
-                    msj = json.dumps(mensaje_TCP).encode('utf-8')
-                    self.sockTCP.sendall(msj)
-                #-------------------------------------------------------MSJ TIPO 0----------------------------------------------------
-                if int(mensaje.get('tipo')) == 0:
-                    #----------------------------------------------MSJ INICIO DE PARTIDA----------------------------------------------
-                    if int(mensaje.get('punta_uno')) == -1 and int(mensaje.get('punta_dos')) == -1:
-                        if nombre_jugador == self.nombre:
-                            self.mano = 'yo'
-                            mensaje_TCP = {
-                                "identificador": "DOMINOCOMUNICACIONESI",
-                                "ficha": {
-                                    "token": "obtenerFicha(self.ronda)"
-                                },
-                                "punta": "obtenerpunta()"
-                            }
-                            msj = json.dumps(mensaje_TCP).encode('utf-8')
-                            self.sockTCP.sendall(msj)
-                        else:
-                            self.mano = nombre_jugador
-                    #-------------------------------------------------MSJ JUGADA NORMAL-----------------------------------------------
-                    elif int(mensaje.get('punta_uno')) != -1 and int(mensaje.get('punta_dos')) != -1 and mensaje.get('evento_pasado'):
-                        evento_pasado = mensaje['evento_pasado']
-                        #-----------------------------------------------JUGADA NORMAL-------------------------------------------------
-                        if evento_pasado.get('tipo') == 0 and evento_pasado.get('jugador') and evento_pasado.get('ficha'):
-                            self.jugadas_pasadas.append(evento_pasado)
-                        #-----------------------------------------------JUGADA ERRONEA------------------------------------------------
-                        elif evento_pasado.get('tipo') == 1 and evento_pasado.get('jugador') and evento_pasado.get('ficha'):
-                            self.jugadas_erroneas.append(evento_pasado)
-                        #-----------------------------------------------JUGADADOR PASÓ------------------------------------------------
-                        elif evento_pasado.get('tipo') == 2 and evento_pasado.get('jugador'):
-                            self.jugador_retirado.append(evento_pasado['jugador'])
+
+        #sockUDP.bind((bind_addr, port))
+        #membership = socket.inet_aton(self.ipMulticast) + socket.inet_aton(bind_addr)
+        
+        sockUDP.bind(('', port))
+        membership = struct.pack("4sl", socket.inet_aton(self.ipMulticast), socket.INADDR_ANY)
+
+        sockUDP.setsockopt(socket.IPPROTO_IP, socket.IP_ADD_MEMBERSHIP, membership)
+        
+        while True:
+            data, address = sockUDP.recvfrom(4096)
+            mensaje = json.loads(data.decode(data))
+            if mensaje.get('identificador') == 'DOMINOCOMUNICACIONESI' and mensaje.get('jugador') and mensaje.get('tipo'):
+                try:
+                    nombre_jugador = mensaje.get('jugador')
+                    if len(self.jugadores) < 4:
+                        self.guardarJugador(nombre_jugador)
+                    if nombre_jugador != self.nombre:
+                        mensaje_TCP = {
+                            "identificador": "DOMINOCOMUNICACIONESI",
+                            "jugador": self.nombre
+                        }
+                        msj = json.dumps(mensaje_TCP).encode('utf-8')
+                        self.sockTCP.sendall(msj)
+                    #-------------------------------------------------------MSJ TIPO 0----------------------------------------------------
+                    if int(mensaje.get('tipo')) == 0:
+                        #----------------------------------------------MSJ INICIO DE PARTIDA----------------------------------------------
+                        if int(mensaje.get('punta_uno')) == -1 and int(mensaje.get('punta_dos')) == -1:
+                            if nombre_jugador == self.nombre:
+                                self.mano = 'yo'
+                                mensaje_TCP = {
+                                    "identificador": "DOMINOCOMUNICACIONESI",
+                                    "ficha": {
+                                        "token": "obtenerFicha(self.ronda)"
+                                    },
+                                    "punta": "obtenerpunta()"
+                                }
+                                msj = json.dumps(mensaje_TCP).encode('utf-8')
+                                self.sockTCP.sendall(msj)
+                            else:
+                                self.mano = nombre_jugador
+                        #-------------------------------------------------MSJ JUGADA NORMAL-----------------------------------------------
+                        elif int(mensaje.get('punta_uno')) != -1 and int(mensaje.get('punta_dos')) != -1 and mensaje.get('evento_pasado'):
+                            evento_pasado = mensaje['evento_pasado']
+                            #-----------------------------------------------JUGADA NORMAL-------------------------------------------------
+                            if evento_pasado.get('tipo') == 0 and evento_pasado.get('jugador') and evento_pasado.get('ficha'):
+                                self.jugadas_pasadas.append(evento_pasado)
+                            #-----------------------------------------------JUGADA ERRONEA------------------------------------------------
+                            elif evento_pasado.get('tipo') == 1 and evento_pasado.get('jugador') and evento_pasado.get('ficha'):
+                                self.jugadas_erroneas.append(evento_pasado)
+                            #-----------------------------------------------JUGADADOR PASÓ------------------------------------------------
+                            elif evento_pasado.get('tipo') == 2 and evento_pasado.get('jugador'):
+                                self.jugador_retirado.append(evento_pasado['jugador'])
+                            else:
+                                print('Mensaje invalido')
                         else:
                             print('Mensaje invalido')
-                    else:
-                        print('Mensaje invalido')
-                #-------------------------------------------------------MSJ TIPO 1----------------------------------------------------                    
-            except socket.error:
-                self.sockTCP.close()
+                    #-------------------------------------------------------MSJ TIPO 1----------------------------------------------------                    
+                except socket.error:
+                    self.sockTCP.close()
+            else:
+                print('Mensaje erroneo')
+        #--------------------------------------------------------------END WHILE----------------------------------------------------------
 
     def guardarJugador(self, nombre):
         count = 0

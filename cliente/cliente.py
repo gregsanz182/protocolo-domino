@@ -70,6 +70,9 @@ class Cliente(threading.Thread):
         self.ip_address = ip
         self.nombre = nombre
         self.mano = mano
+        self.jugadas_pasadas = []
+        self.jugadas_erroneas = []
+        self.jugador_retirado = []
         try:
             self.sockTCP.connect(self.ip_address)
             print('conexion exitosa con {} por el puerto {}'.format(*self.ip_address))
@@ -112,33 +115,48 @@ class Cliente(threading.Thread):
 
     def jugar(self):
         bind_addr = '0.0.0.0'
-            port = self.ip_address[1]
-            sockUDP = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-            membership = socket.inet_aton(ipMmulticast) + socket.inet_aton(bind_addr)
-            sockUDP.setsockopt(socket.IPPROTO_IP, socket.IP_ADD_MEMBERSHIP, membership)
-            sockUDP.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-            sockUDP.bind((bind_addr, port))
-            data, address = sockUDP.recvfrom(4096)
-            mensaje = json.loads(data.decode(data))
-            if mensaje.get('identificador') == 'DOMINOCOMUNICACIONESI' and mensaje.get('jugador') and mensaje.get('tipo'):
-                mensaje_TCP = {
-                    "identificador": "DOMINOCOMUNICACIONESI",
-                    "jugador": "Anny Chacón"
-                }
-                msj = json.dumps(mensaje_TCP).encode('utf-8')
-                try:
-                    self.sockTCP.sendall(msj)
-                    nombre_jugador = mensaje.get('jugador')
-                    if int(mensaje.get('tipo')) == 0:
-                        if int(mensaje.get('punta_uno')) == -1 and int(mensaje.get('punta_dos')) == -1:
-                            if nombre_jugador == self.nombre:
-                                self.mano = 'yo'
-                            else:
-                                self.mano = nombre_jugador
+        port = self.ip_address[1]
+        sockUDP = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        membership = socket.inet_aton(ipMmulticast) + socket.inet_aton(bind_addr)
+        sockUDP.setsockopt(socket.IPPROTO_IP, socket.IP_ADD_MEMBERSHIP, membership)
+        sockUDP.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+        sockUDP.bind((bind_addr, port))
+        data, address = sockUDP.recvfrom(4096)
+        mensaje = json.loads(data.decode(data))
+        if mensaje.get('identificador') == 'DOMINOCOMUNICACIONESI' and mensaje.get('jugador') and mensaje.get('tipo'):
+            mensaje_TCP = {
+                "identificador": "DOMINOCOMUNICACIONESI",
+                "jugador": self.nombre
+            }
+            msj = json.dumps(mensaje_TCP).encode('utf-8')
+            try:
+                self.sockTCP.sendall(msj)
+                nombre_jugador = mensaje.get('jugador')
+                if int(mensaje.get('tipo')) == 0:
+                    if int(mensaje.get('punta_uno')) == -1 and int(mensaje.get('punta_dos')) == -1:
+                        if nombre_jugador == self.nombre:
+                            self.mano = 'yo'
                         else:
-                            evento_pasado = mensaje['evento_pasado']
-                except socket.error:
+                            self.mano = nombre_jugador
+                    elif int(mensaje.get('punta_uno')) != -1 and int(mensaje.get('punta_dos')) != -1 and mensaje.get('evento_pasado'):
+                        evento_pasado = mensaje['evento_pasado']
+                        #-----------------------------------------------JUGADA NORMAL-------------------------------------------------
+                        if evento_pasado.get('tipo') == 0 and evento_pasado.get('jugador') and evento_pasado.get('ficha'):
+                            self.jugadas_pasadas.append(evento_pasado)
+                        #-----------------------------------------------JUGADA ERRONEA------------------------------------------------
+                        elif evento_pasado.get('tipo') == 1 and evento_pasado.get('jugador') and evento_pasado.get('ficha'):
+                            self.jugadas_erroneas.append(evento_pasado)
+                        #-----------------------------------------------JUGADADOR PASÓ------------------------------------------------
+                        elif evento_pasado.get('tipo') == 2 and evento_pasado.get('jugador'):
+                            self.jugador_retirado.append(evento_pasado['jugador'])
+                        else:
+                            print('Mensaje invalido')
+                    else:
+                        print('Mensaje invalido')
                     
+
+            except socket.error:
+
 
 
 #--------------------------------------------MAIN-------------------------------------------------

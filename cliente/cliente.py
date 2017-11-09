@@ -61,6 +61,50 @@ class ReplyServer(threading.Thread):
     def getIP_Server(self):
         return self.ip_server
 
+class Cliente(threading.Thread):
+
+    def __init__(self,ip):
+        super().__init__()
+        self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        self.fichas = []
+        self.ip = ip
+        try:
+            self.sock.connect(self.ip)
+            self.error = False
+        except socket.error:
+            print('No se pudo realizar la conexión...')
+            self.error = True
+            sock.close()
+        print('Cliente {} se conecto con server por {}'.format(*self.ip))
+
+    def getError(self):
+        return self.error
+
+    def run(self):
+        mensaje_TCP = {
+            "identificador": "DOMINOCOMUNICACIONESI",
+            "nombre_jugador": "Anny Chacón"
+        }
+        print(mensaje_TCP)
+        msj = json.dumps(mensaje_TCP).encode('utf-8')
+        sock.sendto(msj, self.ip)
+        print('enviado')
+        print('esperando multicast...')
+        resp = self.sock.recv(4096)
+        respuesta = json.loads(self.resp.decode('utf-8'))
+        if respuesta['identificador'] == 'DOMINOCOMUNICACIONESI':
+            self.ipMultiCast = self.respuesta['multicast_ip']
+        else:
+            self.sock.close()
+        fi = self.sock.recv(4096)
+        fic = json.loads(fi.decode('utf-8'))
+        if fic['identificador'] == 'DOMINOCOMUNICACIONESI':
+            for f in fic['fichas']:
+                self.fichas.append(f)
+                print(f)
+        input('terminar: ')
+
+
 #--------------------------------------------MAIN-------------------------------------------------
 if __name__ == '__main__':
     conection = ('127.255.255.255', 3001)
@@ -78,9 +122,16 @@ if __name__ == '__main__':
         req.join()
         rep.join()
         IPs = rep.getIP_Server()
-        for i, m in enumerate(rep.getMesas()):
-            print(i, m)
-        opc = int(input('seleccionar mesa: Ejemplo: [1]: '))
+        er = True
+        while er == True:
+            for i, m in enumerate(rep.getMesas()):
+                print(i, m)
+            opc = int(input('seleccionar mesa: Ejemplo: [1]: '))
+            print(IPs[opc])
+            cli = Cliente(IPs[opc])
+            er = cli.getError()
+        cli.start()
+
     except socket.error:
         print('error en el socket...')
         sys.exit()

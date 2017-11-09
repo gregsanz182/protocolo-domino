@@ -30,7 +30,7 @@ class HiloDisponibilidad(threading.Thread):
                     if msg.get('identificador') == self.identificadorProtocolo and self.activo:
                         self.mesaJson['sourceIP'] = direccion
                         self.sockUDP.sendto(json.dumps(self.mesaJson).encode('utf-8'), direccion)
-            except TimeoutError:
+            except socket.timeout:
                 pass
         
         self.sockUDP.close()

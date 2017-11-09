@@ -4,10 +4,11 @@ import json
 
 class Jugador():
 
-    def __init__(self, nombre, endpoint, socket):
+    def __init__(self, nombre, idenJugador, endpoint, socket):
         self.nombre = nombre
         self.fichas = []
         self.socketTCP = socket
+        self.idenJugador = idenJugador
     
     def enviarFicha(self, identificador):
         men = {

@@ -14,8 +14,8 @@ class Fichas():
                 self.fichas.append(
                     {
                         'token': hashlib.md5(tok.encode('utf-8')).hexdigest(),
-                        'entero_uno': str(i),
-                        'entero_dos': str(j)
+                        'entero_uno': i,
+                        'entero_dos': j
                     }
                 )
     

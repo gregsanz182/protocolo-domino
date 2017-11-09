@@ -50,7 +50,7 @@ class HiloJuego(threading.Thread):
                     if mensaje_json.get('identificador') == self.identificadorProtocolo and mensaje_json.get('nombre_jugador'):
                         idenJugador = hashlib.md5(str(random.randrange(0, 3500)).encode('utf-8')).hexdigest()
                         respJson = self.jsonMulticast
-                        respJson['iden_jugador'] = idenJugador
+                        respJson['jugador'] = idenJugador
                         conexion.sendall(json.dumps(self.jsonMulticast).encode('utf-8'))
                         print("El jugador {0} se ha conectado bajo la direccion {1}".format(mensaje_json['nombre_jugador'], direccion_cliente))
                         self.jugadores.append(Jugador(mensaje_json['nombre_jugador'], idenJugador, direccion_cliente, conexion))

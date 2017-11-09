@@ -82,8 +82,8 @@ class HiloJuego(threading.Thread):
             'punta_uno': -1,
             'punta_dos': -1
         }
-        while True:
-            
+        self.enviarBroadcast(mensajeJuego)
+
             
     def repartirFichasYEnviar(self):
         self.fichasRonda = Fichas(1, [jugador.nombre for jugador in self.jugadores])

@@ -47,6 +47,7 @@ class HiloJuego(threading.Thread):
                     mensaje = conexion.recv(4096)
                     print('{0} intenta conectarse'.format(direccion_cliente))
                     mensaje_json = json.loads(mensaje.decode('utf-8'))
+                    print(mensaje_json)
                     if mensaje_json.get('identificador') == self.identificadorProtocolo and mensaje_json.get('nombre_jugador'):
                         idenJugador = hashlib.md5(str(random.randrange(0, 3500))).hexdigest()
                         respJson = self.jsonMulticast

@@ -108,7 +108,7 @@ class Cliente(threading.Thread):
             sockUDP = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
             sockUDP.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
 
-            sockUDP.bind((self.ipMulticast, port))
+            sockUDP.bind((socket.gethostbyname(socket.gethostname()), port))
             #sockUDP.bind((bind_addr, port))
             #membership = socket.inet_aton(self.ipMulticast) + socket.inet_aton(bind_addr)
             membership = struct.pack("4sl", socket.inet_aton(self.ipMulticast), socket.INADDR_ANY)
@@ -143,7 +143,8 @@ class Cliente(threading.Thread):
 
         while True:
             data, address = sockUDP.recvfrom(4096)
-            mensaje = json.loads(data.decode(data))
+            mensaje = json.loads(data.decode('utf-8'))
+            print('mensaje multicast: {!r}'.format(mensaje))
             if mensaje.get('identificador') == 'DOMINOCOMUNICACIONESI' and mensaje.get('jugador') and mensaje.get('tipo'):
                 try:
                     nombre_jugador = mensaje.get('jugador')

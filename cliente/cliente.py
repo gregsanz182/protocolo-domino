@@ -22,12 +22,12 @@ class RequestServer(threading.Thread):
 
     def run(self):
         #while True:
-            #lock.acquire()
-            self.mensaje = json.dumps(self.mensaje_json).encode('utf-8')
-            #lock.release()
-            self.sock.sendto(self.mensaje, self.conection)
-            print('mensaje cliente: {}'.format(self.mensaje))
-            time.sleep(2)
+        #lock.acquire()
+        self.mensaje = json.dumps(self.mensaje_json).encode('utf-8')
+        #lock.release()
+        self.sock.sendto(self.mensaje, self.conection)
+        print('mensaje cliente: {}'.format(self.mensaje))
+        time.sleep(2)
 
 #------------------------------------------REPLY--------------------------------------------------
 class ReplyServer(threading.Thread):
@@ -54,7 +54,6 @@ class ReplyServer(threading.Thread):
             except socket.timeout:
                 print('no hay mas respuestas de las mesas')
                 break
-        self.sock.close()
 
     def getMesas(self):
         return self.mesas
@@ -64,19 +63,21 @@ class ReplyServer(threading.Thread):
 
 class Cliente(threading.Thread):
 
-    def __init__(self,ip):
+    def __init__(self,ip,nombre,mano):
         super().__init__()
-        self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        self.sockTCP = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.fichas = []
-        self.ip = ip
+        self.ip_address = ip
+        self.nombre = nombre
+        self.mano = mano
         try:
-            self.sock.connect(self.ip)
-            print('conexion exitosa con {} por el puerto {}'.format(*self.ip))
+            self.sockTCP.connect(self.ip_address)
+            print('conexion exitosa con {} por el puerto {}'.format(*self.ip_address))
             self.er = False
         except socket.error:
             print('No se pudo realizar la conexión...')
             self.er = True
-            sock.close()
+            self.sockTCP.close()
 
     def getError(self):
         return self.er
@@ -88,43 +89,76 @@ class Cliente(threading.Thread):
         }
         print(mensaje_TCP)
         msj = json.dumps(mensaje_TCP).encode('utf-8')
-        self.sock.sendall(msj)
+        self.sockTCP.sendall(msj)
         print('enviado')
         print('esperando multicast...')
-        resp = self.sock.recv(4096)
+        data = self.sockTCP.recv(4096)
         print(resp)
-        respuesta = json.loads(resp.decode('utf-8'))
+        respuesta = json.loads(data.decode('utf-8'))
         if respuesta.get('identificador') == 'DOMINOCOMUNICACIONESI' and respuesta.get('multicast_ip'):
-            self.ipMultiCast = respuesta['multicast_ip']
+            ipMulticast = respuesta['multicast_ip']
+            data = self.sockTCP.recv(4096)
+            fic = json.loads(data.decode('utf-8'))
+            if fic.get('identificador') == 'DOMINOCOMUNICACIONESI' and fic.get('fichas'):
+                for f in fic['fichas']:
+                    self.fichas.append(f)
+                    print(f)
+                while True:
+                    jugar()
         else:
-            print('no se recibio nada')
-            self.sock.close()
-        fi = self.sock.recv(4096)
-        fic = json.loads(fi.decode('utf-8'))
-        if fic.get('identificador') == 'DOMINOCOMUNICACIONESI' and fic.get('fichas'):
-            for f in fic['fichas']:
-                self.fichas.append(f)
-                print(f)
-        input('terminar: ')
-        self.sock.close()
+            print('No hay respuesta del servidor')
+
+        self.sockTCP.close()
+
+    def jugar(self):
+        bind_addr = '0.0.0.0'
+            port = self.ip_address[1]
+            sockUDP = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+            membership = socket.inet_aton(ipMmulticast) + socket.inet_aton(bind_addr)
+            sockUDP.setsockopt(socket.IPPROTO_IP, socket.IP_ADD_MEMBERSHIP, membership)
+            sockUDP.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+            sockUDP.bind((bind_addr, port))
+            data, address = sockUDP.recvfrom(4096)
+            mensaje = json.loads(data.decode(data))
+            if mensaje.get('identificador') == 'DOMINOCOMUNICACIONESI' and mensaje.get('jugador') and mensaje.get('tipo'):
+                mensaje_TCP = {
+                    "identificador": "DOMINOCOMUNICACIONESI",
+                    "jugador": "Anny Chacón"
+                }
+                msj = json.dumps(mensaje_TCP).encode('utf-8')
+                try:
+                    self.sockTCP.sendall(msj)
+                    nombre_jugador = mensaje.get('jugador')
+                    if int(mensaje.get('tipo')) == 0:
+                        if int(mensaje.get('punta_uno')) == -1 and int(mensaje.get('punta_dos')) == -1:
+                            if nombre_jugador == self.nombre:
+                                self.mano = 'yo'
+                            else:
+                                self.mano = nombre_jugador
+                        else:
+                            evento_pasado = mensaje['evento_pasado']
+                except socket.error:
+                    
 
 
 #--------------------------------------------MAIN-------------------------------------------------
 if __name__ == '__main__':
     conection = ('255.255.255.255', 3001)
+    nombre = 'Anny Chacón'
     try:
         lock = threading.Lock()
-        sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-        sock.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)
-        sock.setblocking(1)
-        sock.settimeout(10)
-        req = RequestServer(conection, sock, lock)
+        sockUDP = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        sockUDP.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)
+        sockUDP.setblocking(1)
+        sockUDP.settimeout(10)
+        req = RequestServer(conection, sockUDP, lock)
         req.start()
         time.sleep(2)
-        rep = ReplyServer(sock, lock)
+        rep = ReplyServer(sockUDP, lock)
         rep.start()
         req.join()
         rep.join()
+        sockUDP.close()
         IPs = rep.getIP_Server()
         er = True
         while er == True:
@@ -132,10 +166,11 @@ if __name__ == '__main__':
                 print(i, m)
             opc = int(input('seleccionar mesa: Ejemplo: [0]: '))
             print(IPs[opc])
-            cli = Cliente(IPs[opc])
+            cli = Cliente(IPs[opc],nombre,'')
             er = cli.getError()
         cli.start()
 
-    except socket.error:
+    except sockUDPet.error:
         print('error en el socket...')
+        sockUDP.close()
         sys.exit()

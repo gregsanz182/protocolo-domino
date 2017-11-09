@@ -21,7 +21,7 @@ if __name__ == '__main__':
 
         data = sock.recv(4096)
 
-        mem = json.loads(data)
+        mem = json.loads(data.decode('utf-8'))
         print(mem)
         while True:
             pass

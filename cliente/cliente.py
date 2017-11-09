@@ -70,6 +70,7 @@ class Cliente(threading.Thread):
         self.ip_address = ip
         self.nombre = nombre
         self.mano = mano
+        self.jugadores = []
         self.jugadas_pasadas = []
         self.jugadas_erroneas = []
         self.jugador_retirado = []
@@ -124,20 +125,35 @@ class Cliente(threading.Thread):
         data, address = sockUDP.recvfrom(4096)
         mensaje = json.loads(data.decode(data))
         if mensaje.get('identificador') == 'DOMINOCOMUNICACIONESI' and mensaje.get('jugador') and mensaje.get('tipo'):
-            mensaje_TCP = {
-                "identificador": "DOMINOCOMUNICACIONESI",
-                "jugador": self.nombre
-            }
-            msj = json.dumps(mensaje_TCP).encode('utf-8')
             try:
-                self.sockTCP.sendall(msj)
                 nombre_jugador = mensaje.get('jugador')
+                if len(self.jugadores) < 4:
+                    guardarJugador(nombre_jugador)
+                if nombre_jugador != self.nombre:
+                    mensaje_TCP = {
+                        "identificador": "DOMINOCOMUNICACIONESI",
+                        "jugador": self.nombre
+                    }
+                    msj = json.dumps(mensaje_TCP).encode('utf-8')
+                    self.sockTCP.sendall(msj)
+                #-------------------------------------------------------MSJ TIPO 0----------------------------------------------------
                 if int(mensaje.get('tipo')) == 0:
+                    #----------------------------------------------MSJ INICIO DE PARTIDA----------------------------------------------
                     if int(mensaje.get('punta_uno')) == -1 and int(mensaje.get('punta_dos')) == -1:
                         if nombre_jugador == self.nombre:
                             self.mano = 'yo'
+                            mensaje_TCP = {
+                                "identificador": "DOMINOCOMUNICACIONESI",
+                                "ficha": {
+                                    "token": obtenerFicha()
+                                },
+                                "punta": obtenerpunta()
+                            }
+                            msj = json.dumps(mensaje_TCP).encode('utf-8')
+                            self.sockTCP.sendall(msj)
                         else:
                             self.mano = nombre_jugador
+                    #-------------------------------------------------MSJ JUGADA NORMAL-----------------------------------------------
                     elif int(mensaje.get('punta_uno')) != -1 and int(mensaje.get('punta_dos')) != -1 and mensaje.get('evento_pasado'):
                         evento_pasado = mensaje['evento_pasado']
                         #-----------------------------------------------JUGADA NORMAL-------------------------------------------------
@@ -153,11 +169,19 @@ class Cliente(threading.Thread):
                             print('Mensaje invalido')
                     else:
                         print('Mensaje invalido')
+                #-------------------------------------------------------MSJ TIPO 1----------------------------------------------------
+                elif int(mensaje.get('tipo')) == 1:
                     
 
             except socket.error:
 
-
+    def guardarJugador(self, nombre):
+        count = 0
+        for j in self.jugadores:
+            if j == nombre:
+                cont = cont + 1
+        if cont == 0:
+            self.jugadores.append(nombre)
 
 #--------------------------------------------MAIN-------------------------------------------------
 if __name__ == '__main__':

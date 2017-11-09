@@ -98,7 +98,7 @@ class Cliente(threading.Thread):
         print('enviado')
         print('esperando multicast...')
         data = self.sockTCP.recv(4096)
-        print(resp)
+        print(data)
         respuesta = json.loads(data.decode('utf-8'))
         if respuesta.get('identificador') == 'DOMINOCOMUNICACIONESI' and respuesta.get('multicast_ip'):
             self.ipMulticast = respuesta['multicast_ip']

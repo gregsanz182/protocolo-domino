@@ -82,7 +82,9 @@ class HiloJuego(threading.Thread):
             'punta_uno': -1,
             'punta_dos': -1
         }
-        self.enviarBroadcast(mensajeJuego)
+        while True:
+            self.enviarBroadcast(mensajeJuego)
+            self.esperarJugada()
 
             
     def repartirFichasYEnviar(self):
@@ -112,3 +114,9 @@ class HiloJuego(threading.Thread):
 
     def enviarBroadcast(self, data):
         self.sockMulticast.sendto(json.dumps(data).encode('utf-8'), self.multicastendpoint)
+
+    def esperarJugada(self, jugador):
+        mensaje = jugador.socketTCP.recv(4096)
+        menJson = json.loads(mensaje.decode('utf-8'))
+        if menJson.get('identificador') == self.identificadorProtocolo and menJson.get('ficha').get('token') and menJson.get('punta'):
+            if jugador.verificarFicha((menJson['ficha'][entero]))

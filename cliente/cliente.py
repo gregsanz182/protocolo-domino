@@ -7,6 +7,7 @@ import json
 import sys
 import threading
 import time
+import struct
 
 #----------------------------------------REQUEST----------------------------------------------------
 class RequestServer(threading.Thread):
@@ -102,35 +103,48 @@ class Cliente(threading.Thread):
         respuesta = json.loads(data.decode('utf-8'))
         if respuesta.get('identificador') == 'DOMINOCOMUNICACIONESI' and respuesta.get('multicast_ip'):
             self.ipMulticast = respuesta['multicast_ip']
+            #bind_addr = '0.0.0.0'
+            port = self.ip_address[1]
+            sockUDP = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+            sockUDP.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+
+            sockUDP.bind((socket.gethostbyname(socket.gethostname()), port))
+            #sockUDP.bind((bind_addr, port))
+            #membership = socket.inet_aton(self.ipMulticast) + socket.inet_aton(bind_addr)
+            membership = struct.pack("4sl", socket.inet_aton(self.ipMulticast), socket.INADDR_ANY)
+
+            sockUDP.setsockopt(socket.IPPROTO_IP, socket.IP_ADD_MEMBERSHIP, membership)
+
             data = self.sockTCP.recv(4096)
             fic = json.loads(data.decode('utf-8'))
             if fic.get('identificador') == 'DOMINOCOMUNICACIONESI' and fic.get('fichas'):
                 for f in fic['fichas']:
                     self.fichas.append(f)
                     print(f)
-                self.jugar()
+                self.jugar(sockUDP)
         else:
             print('No hay respuesta del servidor')
 
         self.sockTCP.close()
 
-    def jugar(self):
-        bind_addr = '0.0.0.0'
-        port = self.ip_address[1]
-        sockUDP = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-        sockUDP.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+    def jugar(self,sockUDP):
+        #bind_addr = '0.0.0.0'
+        #port = self.ip_address[1]
+        #sockUDP = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        #sockUDP.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
 
         #sockUDP.bind((bind_addr, port))
         #membership = socket.inet_aton(self.ipMulticast) + socket.inet_aton(bind_addr)
         
-        sockUDP.bind(('', port))
-        membership = struct.pack("4sl", socket.inet_aton(self.ipMulticast), socket.INADDR_ANY)
+        #sockUDP.bind(('', port))
+        #membership = struct.pack("4sl", socket.inet_aton(self.ipMulticast), socket.INADDR_ANY)
 
-        sockUDP.setsockopt(socket.IPPROTO_IP, socket.IP_ADD_MEMBERSHIP, membership)
-        
+        #sockUDP.setsockopt(socket.IPPROTO_IP, socket.IP_ADD_MEMBERSHIP, membership)
+
         while True:
             data, address = sockUDP.recvfrom(4096)
-            mensaje = json.loads(data.decode(data))
+            mensaje = json.loads(data.decode('utf-8'))
+            print('mensaje multicast: {!r}'.format(mensaje))
             if mensaje.get('identificador') == 'DOMINOCOMUNICACIONESI' and mensaje.get('jugador') and mensaje.get('tipo'):
                 try:
                     nombre_jugador = mensaje.get('jugador')

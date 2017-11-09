@@ -5,9 +5,9 @@ import json
 if __name__ == '__main__':
     sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
-    server_address = ('localhost', 3001)
+    server_address = ('localhost', 3001) 
     print('Comenzando en {} puerto {}'.format(*server_address))
-    sock.bind(server_address)
+    sock.bind(server_addresss)
 
     sock.listen(1)
 
@@ -39,7 +39,8 @@ if __name__ == '__main__':
             print('Conexion desde', client_address)
 
             while True:
-                data = connection.recv(2024)
+                data = connection.recv(4096)
+                print('pasa recv')
                 if data:
                     menrec = json.loads(data.decode('utf-8'))
                     print(menrec)

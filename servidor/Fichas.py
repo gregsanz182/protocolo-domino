@@ -11,13 +11,13 @@ class Fichas():
         for i in range(0, 7):
             for j in range(i, 7):
                 tok = cad+str(i)+str(j)+str(random.randrange(0, 2500))
-                self.fichas.append([
+                self.fichas.append(
                     {
                         'token': hashlib.md5(tok.encode('utf-8')).hexdigest(),
                         'entero_uno': str(i),
                         'entero_dos': str(j)
                     }
-                ])
+                )
     
     def randPop(self):
         return self.fichas.pop(random.randrange(len(self.fichas)))

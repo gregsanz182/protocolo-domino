@@ -108,7 +108,7 @@ class Cliente(threading.Thread):
                     self.fichas.append(f)
                     print(f)
                 while True:
-                    jugar()
+                    self.jugar()
         else:
             print('No hay respuesta del servidor')
 
@@ -128,7 +128,7 @@ class Cliente(threading.Thread):
             try:
                 nombre_jugador = mensaje.get('jugador')
                 if len(self.jugadores) < 4:
-                    guardarJugador(nombre_jugador)
+                    self.guardarJugador(nombre_jugador)
                 if nombre_jugador != self.nombre:
                     mensaje_TCP = {
                         "identificador": "DOMINOCOMUNICACIONESI",
@@ -145,9 +145,9 @@ class Cliente(threading.Thread):
                             mensaje_TCP = {
                                 "identificador": "DOMINOCOMUNICACIONESI",
                                 "ficha": {
-                                    "token": obtenerFicha()
+                                    "token": "obtenerFicha()"
                                 },
-                                "punta": obtenerpunta()
+                                "punta": "obtenerpunta()"
                             }
                             msj = json.dumps(mensaje_TCP).encode('utf-8')
                             self.sockTCP.sendall(msj)
@@ -169,11 +169,9 @@ class Cliente(threading.Thread):
                             print('Mensaje invalido')
                     else:
                         print('Mensaje invalido')
-                #-------------------------------------------------------MSJ TIPO 1----------------------------------------------------
-                elif int(mensaje.get('tipo')) == 1:
-                    
-
+                #-------------------------------------------------------MSJ TIPO 1----------------------------------------------------                    
             except socket.error:
+                self.sockTCP.close()
 
     def guardarJugador(self, nombre):
         count = 0
@@ -203,16 +201,19 @@ if __name__ == '__main__':
         sockUDP.close()
         IPs = rep.getIP_Server()
         er = True
-        while er == True:
-            for i, m in enumerate(rep.getMesas()):
-                print(i, m)
-            opc = int(input('seleccionar mesa: Ejemplo: [0]: '))
-            print(IPs[opc])
-            cli = Cliente(IPs[opc],nombre,'')
-            er = cli.getError()
-        cli.start()
+        if IPs:
+            while er == True and IPs:
+                for i, m in enumerate(rep.getMesas()):
+                    print(i, m)
+                opc = int(input('seleccionar mesa: Ejemplo: [0]: '))
+                print(IPs[opc])
+                cli = Cliente(IPs[opc],nombre,'')
+                er = cli.getError()
+            cli.start()
+        else:
+            print('no hay servidores disponibles')
 
-    except sockUDPet.error:
+    except socket.error:
         print('error en el socket...')
         sockUDP.close()
         sys.exit()

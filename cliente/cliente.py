@@ -46,7 +46,7 @@ class ReplyServer(threading.Thread):
                 self.msj, self.direc = self.sock.recvfrom(4096)
                 #lock.release()
                 self.mensaje = json.loads(self.msj.decode('utf-8'))
-                if self.mensaje['identificador'] == 'DOMINOCOMUNICACIONESI':
+                if self.mensaje.get('identificador') == 'DOMINOCOMUNICACIONESI' and self.mensaje.get('nombre_mesa'):
                     self.mesas.append(self.mensaje['nombre_mesa'])
                     self.ip_server.append(self.direc)
                     print(self.mesas)
@@ -92,18 +92,21 @@ class Cliente(threading.Thread):
         print('enviado')
         print('esperando multicast...')
         resp = self.sock.recv(4096)
+        print(resp)
         respuesta = json.loads(resp.decode('utf-8'))
-        if respuesta['identificador'] == 'DOMINOCOMUNICACIONESI':
+        if respuesta.get('identificador') == 'DOMINOCOMUNICACIONESI' and respuesta.get('multicast_ip'):
             self.ipMultiCast = respuesta['multicast_ip']
         else:
+            print('no se recibio nada')
             self.sock.close()
         fi = self.sock.recv(4096)
         fic = json.loads(fi.decode('utf-8'))
-        if fic['identificador'] == 'DOMINOCOMUNICACIONESI':
+        if fic.get('identificador') == 'DOMINOCOMUNICACIONESI' and fic.get('fichas'):
             for f in fic['fichas']:
                 self.fichas.append(f)
                 print(f)
         input('terminar: ')
+        self.sock.close()
 
 
 #--------------------------------------------MAIN-------------------------------------------------

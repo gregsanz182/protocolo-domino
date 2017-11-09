@@ -32,7 +32,7 @@ class HiloJuego(threading.Thread):
         self.sockTCP.settimeout(5)
         tiempo_comienzo = time.time()
         countdown = False
-        while (time.time() - tiempo_comienzo) < 10 and len(self.jugadores) < 4:
+        while (time.time() - tiempo_comienzo) < 10 and len(self.jugadores) < 1:
             try:
                 conexion, direccion_cliente = self.sockTCP.accept()
                 if conexion:
@@ -40,6 +40,7 @@ class HiloJuego(threading.Thread):
                     mensaje = conexion.recv(4096)
                     print('{0} intenta conectarse'.format(direccion_cliente))
                     mensaje_json = json.loads(mensaje.decode('utf-8'))
+                    print(mensaje_json)
                     if mensaje_json.get('identificador') == self.identificadorProtocolo and mensaje_json.get('nombre_jugador'):
                         conexion.sendall(json.dumps(self.jsonMulticast).encode('utf-8'))
                         print("El jugador {0} se ha conectado bajo la direccion {1}".format(mensaje_json['nombre_jugador'], direccion_cliente))

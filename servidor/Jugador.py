@@ -14,6 +14,7 @@ class Jugador():
             'identificador': 'DOMINOCOMUNICACIONESI',
             'fichas': self.fichas
         }
+        print(men)
         self.socketTCP.sendall(json.dumps(men).encode('utf-8'))
         
 

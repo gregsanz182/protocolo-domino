@@ -20,11 +20,11 @@ if __name__ == '__main__':
         sock.sendall(message)
 
         data = sock.recv(4096)
-
+        print(data.decode('utf-8'))
         mem = json.loads(data.decode('utf-8'))
         print(mem)
         data = sock.recv(4096)
-
+        print(data.decode('utf-8'))
         mem = json.loads(data.decode('utf-8'))
         print(mem)
 

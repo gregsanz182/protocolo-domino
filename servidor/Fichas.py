@@ -23,6 +23,7 @@ class Fichas():
         return self.fichas.pop(random.randrange(len(self.fichas)))
 
     def imprimir(self):
+        print(len(self.fichas))
         for ficha in self.fichas:
             print(ficha)
 

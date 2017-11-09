@@ -32,7 +32,7 @@ class HiloJuego(threading.Thread):
         self.sockTCP.settimeout(5)
         tiempo_comienzo = time.time()
         countdown = False
-        while (time.time() - tiempo_comienzo) < 10 and len(self.jugadores) < 4:
+        while (time.time() - tiempo_comienzo) < 10 and len(self.jugadores) < 1:
             try:
                 conexion, direccion_cliente = self.sockTCP.accept()
                 if conexion:
@@ -66,11 +66,10 @@ class HiloJuego(threading.Thread):
         self.fichasRonda = Fichas(1, [jugador.nombre for jugador in self.jugadores])
         for jugador in self.jugadores:
             jugador.fichas = self.fichasRonda.tomarMano()
-            print(jugador.fichas)
             
         self.enviarFichas()
 
     def enviarFichas(self):
         for jugador in self.jugadores:
-            jugador.enviarFicha(self.identificador)
+            jugador.enviarFicha(self.identificadorProtocolo)
 

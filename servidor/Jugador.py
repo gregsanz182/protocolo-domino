@@ -8,3 +8,4 @@ class Jugador():
         self.fichas = []
         self.socketTCP = socket
         
+

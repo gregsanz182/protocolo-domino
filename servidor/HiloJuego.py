@@ -22,6 +22,7 @@ class HiloJuego(threading.Thread):
 
     def run(self):
         self.lobby()
+        self.iniciarRonda()
 
     def lobby(self):
         self.escucharUDP()
@@ -58,3 +59,9 @@ class HiloJuego(threading.Thread):
 
     def detenerUDP(self):
         self.disp.activo = False
+
+    def iniciarRonda(self):
+        self.fichasRonda = Fichas(1, [jugador.nombre for jugador in jugadores])
+        for jugador in self.jugadores:
+            jugador.fichas = self.fichasRonda.tomarMano()
+            print(jugador.fichas)

@@ -72,5 +72,5 @@ class HiloJuego(threading.Thread):
 
     def enviarFichas(self):
         for jugador in self.jugadores:
-            jugador.enviarFicha()
+            jugador.enviarFicha(self.identificador)
 

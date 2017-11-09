@@ -5,6 +5,7 @@ import threading
 import time
 from Jugador import Jugador
 from HiloDisponibilidad import HiloDisponibilidad
+from Fichas import Fichas
 
 class HiloJuego(threading.Thread):
 
@@ -61,7 +62,8 @@ class HiloJuego(threading.Thread):
         self.disp.activo = False
 
     def iniciarRonda(self):
-        self.fichasRonda = Fichas(1, [jugador.nombre for jugador in jugadores])
+        print("Iniciando Ronda")
+        self.fichasRonda = Fichas(1, [jugador.nombre for jugador in self.jugadores])
         for jugador in self.jugadores:
             jugador.fichas = self.fichasRonda.tomarMano()
             print(jugador.fichas)

@@ -14,8 +14,8 @@ class Fichas():
                 self.fichas.append(
                     {
                         'token': hashlib.md5(tok.encode('utf-8')).hexdigest(),
-                        'entero_uno': str(i),
-                        'entero_dos': str(j)
+                        'entero_uno': i,
+                        'entero_dos': j
                     }
                 )
     
@@ -23,6 +23,7 @@ class Fichas():
         return self.fichas.pop(random.randrange(len(self.fichas)))
 
     def imprimir(self):
+        print(len(self.fichas))
         for ficha in self.fichas:
             print(ficha)
 

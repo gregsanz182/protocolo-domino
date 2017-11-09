@@ -13,11 +13,11 @@ class HiloJuego(threading.Thread):
         super().__init__()
         self.identificadorProtocolo = 'DOMINOCOMUNICACIONESI'
         self.TCPendpoint = ('0.0.0.0', 3001)
+        self.sockTCP = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.jsonMulticast = {
             'identificador': self.identificadorProtocolo,
             'multicast_ip': '254.569.122'
         }
-        self.sockTCP = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.jugadores = []
         self.disp = HiloDisponibilidad(self.identificadorProtocolo)
 

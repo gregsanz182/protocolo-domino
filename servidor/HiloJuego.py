@@ -12,7 +12,7 @@ class HiloJuego(threading.Thread):
     def __init__(self):
         super().__init__()
         self.identificadorProtocolo = 'DOMINOCOMUNICACIONESI'
-        self.TCPendpoint = ('192.168.0.3', 3001)
+        self.TCPendpoint = ('0.0.0.0', 3001)
         self.jsonMulticast = {
             'identificador': self.identificadorProtocolo,
             'multicast_ip': '254.569.122'
@@ -66,4 +66,10 @@ class HiloJuego(threading.Thread):
         self.fichasRonda = Fichas(1, [jugador.nombre for jugador in self.jugadores])
         for jugador in self.jugadores:
             jugador.fichas = self.fichasRonda.tomarMano()
-            print(jugador.fichas)
+            
+        self.enviarFichas()
+
+    def enviarFichas(self):
+        for jugador in self.jugadores:
+            jugador.enviarFicha()
+

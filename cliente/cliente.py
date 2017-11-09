@@ -87,7 +87,7 @@ class Cliente(threading.Thread):
         }
         print(mensaje_TCP)
         msj = json.dumps(mensaje_TCP).encode('utf-8')
-        sock.sendto(msj, self.ip)
+        sock.sendall(msj)
         print('enviado')
         print('esperando multicast...')
         resp = self.sock.recv(4096)

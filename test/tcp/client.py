@@ -5,7 +5,7 @@ import json
 if __name__ == '__main__':
     sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
-    server_address = ('localhost', 3001)
+    server_address = ('192.168.0.3', 3001)
     print('Conectandose a {} port {}'.format(*server_address))
     sock.connect(server_address)
 
@@ -21,7 +21,7 @@ if __name__ == '__main__':
 
         data = sock.recv(4096)
 
-        mem = json.loads(cad)
+        mem = json.loads(data)
         print(mem)
         while True:
             pass

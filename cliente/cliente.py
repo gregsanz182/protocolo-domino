@@ -147,13 +147,9 @@ class Cliente(threading.Thread):
                             if evento_pasado.get('tipo') == 0 and evento_pasado.get('jugador') and evento_pasado.get('ficha'):
                                 self.guardarJugada(mensaje['punta_uno'], mensaje['punta_dos'])
                                 self.fichas_jugadas.append(evento_pasado['ficha'])
-                            else:
-                                print('Mensaje interno invalido')
-                        else:
-                            print('Mensaje de jugada normal invalido')
 
                         token, punta = self.obtenerJugada(mensaje)
-
+                        print('token: {!r} punta: {!r} a jugar'.format(token,punta))
                         if token == None:
                             mensaje_TCP = {
                                 "identificador": "DOMINOCOMUNICACIONESI",

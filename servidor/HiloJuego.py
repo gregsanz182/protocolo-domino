@@ -54,7 +54,7 @@ class HiloJuego(threading.Thread):
                         print("El jugador {0} se ha conectado bajo la direccion {1}".format(mensaje_json['nombre_jugador'], direccion_cliente))
                         self.jugadores.append(Jugador(mensaje_json['nombre_jugador'], idenJugador, direccion_cliente, conexion))
                         tiempo_comienzo = time.time()
-                        if len(self.jugadores) == 1:
+                        if len(self.jugadores) == 2:
                             countdown = True
             except (socket.timeout, ValueError):
                 pass
@@ -106,6 +106,10 @@ class HiloJuego(threading.Thread):
                     'punta_dos': tableroCola[len(tableroCola)-1],
                     'evento_pasado': evento_pasado
                 }
+            print('|', end='')
+            for i, ficha in enumerate(tableroCola):
+                print('{0}{1}'.format(ficha, ':' if (i%2)==0 else '|'), end='')
+            print('')
             self.enviarBroadcast(mensajeJuego)
             
     def repartirFichasYEnviar(self):
@@ -134,7 +138,6 @@ class HiloJuego(threading.Thread):
         return jugador
 
     def enviarBroadcast(self, data):
-        print(json.dumps(data))
         self.sockMulticast.sendto(json.dumps(data).encode('utf-8'), self.multicastendpoint)
 
     def esperarYrealizarJugada(self, jugador, tableroCola):
@@ -148,16 +151,20 @@ class HiloJuego(threading.Thread):
                     'jugador': jugador.idenJugador
                 }
             ficha = jugador.verificarFicha(menJson['ficha']['token'])
-            evento_pasado = {
-                'jugador': jugador.idenJugador,
-                'ficha': {
-                    'entero_uno': ficha['entero_uno'],
-                    'entero_dos': ficha['entero_dos'],
-                    'punta': menJson['punta']
+            if ficha:
+                evento_pasado = {
+                    'jugador': jugador.idenJugador,
+                    'ficha': {
+                        'entero_uno': ficha['entero_uno'],
+                        'entero_dos': ficha['entero_dos'],
+                        'punta': menJson['punta']
+                    }
                 }
-            }
-            if self.realizarJugada(tableroCola, ficha, menJson['punta']):
-                evento_pasado['tipo'] = 0
+                if self.realizarJugada(tableroCola, ficha, menJson['punta']):
+                    jugador.fichas.remove(ficha)
+                    evento_pasado['tipo'] = 0
+                else:
+                    evento_pasado['tipo'] = 1
             else:
                 evento_pasado['tipo'] = 1
             return evento_pasado

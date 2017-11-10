@@ -72,10 +72,11 @@ class Cliente(threading.Thread):
         self.nombre = nombre
         self.mano = mano
         self.jugadores = []
-        self.jugadas_pasadas = []
+        self.fichas_jugadas = []
         self.jugadas_erroneas = []
         self.jugador_retirado = []
         self.ronda = 1
+        self.tablero = []
         try:
             self.sockTCP.connect(self.ip_address)
             print('conexion exitosa con {} por el puerto {}'.format(*self.ip_address))
@@ -101,8 +102,9 @@ class Cliente(threading.Thread):
         data = self.sockTCP.recv(4096)
         print(data)
         respuesta = json.loads(data.decode('utf-8'))
-        if respuesta.get('identificador') == 'DOMINOCOMUNICACIONESI' and respuesta.get('multicast_ip'):
+        if respuesta.get('identificador') == 'DOMINOCOMUNICACIONESI' and respuesta.get('multicast_ip') and respuesta.get('jugador'):
             self.ipMulticast = respuesta['multicast_ip']
+            self.identificador_jugador = respuesta['jugador']
             #bind_addr = '0.0.0.0'
             port = self.ip_address[1]
             sockUDP = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
@@ -128,58 +130,23 @@ class Cliente(threading.Thread):
         self.sockTCP.close()
 
     def jugar(self,sockUDP):
-        #bind_addr = '0.0.0.0'
-        #port = self.ip_address[1]
-        #sockUDP = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-        #sockUDP.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-
-        #sockUDP.bind((bind_addr, port))
-        #membership = socket.inet_aton(self.ipMulticast) + socket.inet_aton(bind_addr)
-        
-        #sockUDP.bind(('', port))
-        #membership = struct.pack("4sl", socket.inet_aton(self.ipMulticast), socket.INADDR_ANY)
-
-        #sockUDP.setsockopt(socket.IPPROTO_IP, socket.IP_ADD_MEMBERSHIP, membership)
-
         while True:
+            #-------------------------------------------------------------MSJ MULTICAST---------------------------------------------------
             data, address = sockUDP.recvfrom(4096)
             mensaje = json.loads(data.decode('utf-8'))
             print('mensaje multicast: {!r}'.format(mensaje))
             if mensaje.get('identificador') == 'DOMINOCOMUNICACIONESI' and mensaje.get('jugador') and mensaje.get('tipo'):
-                try:
-                    nombre_jugador = mensaje.get('jugador')
-                    if len(self.jugadores) < 4:
-                        self.guardarJugador(nombre_jugador)
-                    if nombre_jugador != self.nombre:
-                        mensaje_TCP = {
-                            "identificador": "DOMINOCOMUNICACIONESI",
-                            "jugador": self.nombre
-                        }
-                        msj = json.dumps(mensaje_TCP).encode('utf-8')
-                        self.sockTCP.sendall(msj)
+                jugador = mensaje['jugador']
+                if jugador == self.identificador_jugador:
                     #-------------------------------------------------------MSJ TIPO 0----------------------------------------------------
                     if int(mensaje.get('tipo')) == 0:
-                        #----------------------------------------------MSJ INICIO DE PARTIDA----------------------------------------------
-                        if int(mensaje.get('punta_uno')) == -1 and int(mensaje.get('punta_dos')) == -1:
-                            if nombre_jugador == self.nombre:
-                                self.mano = 'yo'
-                                mensaje_TCP = {
-                                    "identificador": "DOMINOCOMUNICACIONESI",
-                                    "ficha": {
-                                        "token": "obtenerFicha(self.ronda)"
-                                    },
-                                    "punta": "obtenerpunta()"
-                                }
-                                msj = json.dumps(mensaje_TCP).encode('utf-8')
-                                self.sockTCP.sendall(msj)
-                            else:
-                                self.mano = nombre_jugador
                         #-------------------------------------------------MSJ JUGADA NORMAL-----------------------------------------------
-                        elif int(mensaje.get('punta_uno')) != -1 and int(mensaje.get('punta_dos')) != -1 and mensaje.get('evento_pasado'):
+                        if int(mensaje.get('entero_uno')) != -1 and int(mensaje.get('entero_uno')) != -1 and mensaje.get('evento_pasado'):
                             evento_pasado = mensaje['evento_pasado']
-                            #-----------------------------------------------JUGADA NORMAL-------------------------------------------------
+                            #-------------------------------JUGADA NORMAL--------GUARDANDO PUNTAS-----------------------------------------
                             if evento_pasado.get('tipo') == 0 and evento_pasado.get('jugador') and evento_pasado.get('ficha'):
-                                self.jugadas_pasadas.append(evento_pasado)
+                                self.guardarJugada(evento_pasado['ficha']['entero_uno'], evento_pasado['ficha']['entero_dos'], evento_pasado['ficha']['punta'])
+                                self.fichas_jugadas.append(evento_pasado['ficha'])
                             #-----------------------------------------------JUGADA ERRONEA------------------------------------------------
                             elif evento_pasado.get('tipo') == 1 and evento_pasado.get('jugador') and evento_pasado.get('ficha'):
                                 self.jugadas_erroneas.append(evento_pasado)
@@ -187,23 +154,86 @@ class Cliente(threading.Thread):
                             elif evento_pasado.get('tipo') == 2 and evento_pasado.get('jugador'):
                                 self.jugador_retirado.append(evento_pasado['jugador'])
                             else:
-                                print('Mensaje invalido')
+                                print('Mensaje interno invalido')
                         else:
-                            print('Mensaje invalido')
-                    #-------------------------------------------------------MSJ TIPO 1----------------------------------------------------                    
-                except socket.error:
-                    self.sockTCP.close()
+                            print('Mensaje de jugada normal invalido')
+
+                        token, punta = self.obtenerJugada(mensaje)
+
+                        if token == None:
+                            mensaje_TCP = {
+                                "identificador": "DOMINOCOMUNICACIONESI",
+                                "ficha": {
+                                    "token": -1
+                                },
+                                "punta": False
+                            }
+                        else:
+                            mensaje_TCP = {
+                                "identificador": "DOMINOCOMUNICACIONESI",
+                                "ficha": {
+                                    "token": token
+                                },
+                                "punta": punta
+                            }
+                        try:
+                            mensaje_envio = json.dumps(mensaje_TCP).encode('utf-8')
+                            self.sockTCP.sendall(mensaje_envio)
+                        except socket.error:
+                            self.sockTCP.close()
+                    #-------------------------------------------------------MSJ TIPO 1----------------------------------------------------     
+                    else:
+                        break    
+                else:
+                    break           
             else:
                 print('Mensaje erroneo')
+                break
         #--------------------------------------------------------------END WHILE----------------------------------------------------------
 
-    def guardarJugador(self, nombre):
-        count = 0
-        for j in self.jugadores:
-            if j == nombre:
+    def obtenerJugada(self, mensaje):
+        if int(mensaje.get('entero_uno')) == -1 and int(mensaje.get('entero_uno')) == -1 and self.ronda == 1:
+            x = 6
+            suma = []
+            aux = 0
+            pos = 0
+            for i, f in enumerate(self.fichas):
+                if int(f['entero_uno']) == x and int(f['entero_dos']) == x:
+                    return f['token'], False
+                x = x - 1
+                suma.append(int(f['entero_uno']) + int(f['entero_dos']))
+                if suma[i] > aux:
+                    aux = suma[i]
+                    pos = i
+            return self.fichas[pos]['token'], False
+        else:
+            cont = 0
+            while cont < len(self.fichas):
+                if self.fichas[cont]['entero_uno'] == self.tablero[0] or self.fichas[cont]['entero_dos'] == self.tablero[0]
+                    return self.fichas[pos]['token'], True
+                if self.fichas[cont]['entero_uno'] == self.tablero[len(self.tablero)-1] or self.fichas[cont]['entero_dos'] == self.tablero[len(self.tablero)-1]
+                    return self.fichas[pos]['token'], False
                 cont = cont + 1
-        if cont == 0:
-            self.jugadores.append(nombre)
+            return None, None
+
+    def guardarJugada(self,entero_uno,entero_dos,punta):
+        if len(self.tablero) == 0:
+            self.tablero.extend(entero_uno,entero_dos)
+        elif punta:
+            if entero_uno == self.tablero[0]:
+                self.tablero.insert(0, entero_uno)
+                self.tablero.insert(0, entero_dos)
+            elif entero_dos == self.tablero[0]:
+                self.tablero.insert(0, entero_dos)
+                self.tablero.insert(0, entero_uno)
+        else:
+            if entero_uno == self.tablero[len(self.tablero)-1]:
+                self.tablero.apppend(entero_uno)
+                self.tablero.apppend(entero_dos)
+            elif entero_dos == self.tablero[len(self.tablero)-1]:
+                self.tablero.apppend(entero_dos)
+                self.tablero.apppend(entero_uno)
+
 
 #--------------------------------------------MAIN-------------------------------------------------
 if __name__ == '__main__':

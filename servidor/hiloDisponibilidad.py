@@ -25,12 +25,9 @@ class HiloDisponibilidad(threading.Thread):
         while self.activo:
             try:
                 mensaje, direccion = self.sockUDP.recvfrom(4096)
-                print(mensaje, direccion)
                 if mensaje:
                     msg = json.loads(mensaje.decode('utf-8'))
                     if msg.get('identificador') == self.identificadorProtocolo and self.activo:
-                        #self.mesaJson['sourceIP'] = direccion
-                        print(self.mesaJson)
                         self.sockUDP.sendto(json.dumps(self.mesaJson).encode('utf-8'), direccion)
             except socket.timeout:
                 pass

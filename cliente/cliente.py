@@ -216,7 +216,7 @@ class Cliente(threading.Thread):
             self.tablero.extend([punta_uno, punta_dos])
         else:
             self.tablero.insert(0, punta_uno)
-            self.tablero.apppend(punta_dos)
+            self.tablero.append(punta_dos)
 
     def eliminarFicha(self,token):
         

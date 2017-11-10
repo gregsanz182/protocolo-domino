@@ -55,7 +55,7 @@ class HiloJuego(threading.Thread):
                         print("El jugador {0} se ha conectado bajo la direccion {1}".format(mensaje_json['nombre_jugador'], direccion_cliente))
                         self.jugadores.append(Jugador(mensaje_json['nombre_jugador'], idenJugador, direccion_cliente, conexion))
                         tiempo_comienzo = time.time()
-                        if len(self.jugadores) == 2:
+                        if len(self.jugadores) == 1:
                             countdown = True
             except (socket.timeout, ValueError):
                 pass

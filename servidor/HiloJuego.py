@@ -38,7 +38,7 @@ class HiloJuego(threading.Thread):
         self.sockTCP.settimeout(5)
         tiempo_comienzo = time.time()
         countdown = False
-        while (time.time() - tiempo_comienzo) < 5 and len(self.jugadores) < 4:
+        while (time.time() - tiempo_comienzo) < 10 and len(self.jugadores) < 4:
             try:
                 conexion, direccion_cliente = self.sockTCP.accept()
                 if conexion:
@@ -86,6 +86,7 @@ class HiloJuego(threading.Thread):
         self.enviarBroadcast(mensajeJuego)
         while jugando:
             evento_pasado = self.esperarYrealizarJugada(jugadorTurno, tableroCola)
+            time.sleep(2)
             jugadorGanador, razon = self.validarFinRonda(tableroCola, jugadorTurno)
             if jugadorGanador:
                 mensajeJuego = {
@@ -140,6 +141,7 @@ class HiloJuego(threading.Thread):
         return jugador
 
     def enviarBroadcast(self, data):
+        print(data)
         self.sockMulticast.sendto(json.dumps(data).encode('utf-8'), self.multicastendpoint)
 
     def esperarYrealizarJugada(self, jugador, tableroCola):

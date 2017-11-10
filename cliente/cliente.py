@@ -141,7 +141,7 @@ class Cliente(threading.Thread):
                     #-------------------------------------------------------MSJ TIPO 0----------------------------------------------------
                     if mensaje.get('tipo') == 0:
                         #-------------------------------------------------MSJ JUGADA NORMAL-----------------------------------------------
-                        if mensaje.get('punta_uno') != -1 and (mensaje.get('punta_dos') != -1 and mensaje.get('evento_pasado'):
+                        if mensaje.get('punta_uno') != -1 and (mensaje.get('punta_dos') != -1 and mensaje.get('evento_pasado')):
                             evento_pasado = mensaje['evento_pasado']
                             #-------------------------------JUGADA NORMAL--------GUARDANDO PUNTAS-----------------------------------------
                             if evento_pasado.get('tipo') == 0 and evento_pasado.get('jugador') and evento_pasado.get('ficha'):
@@ -208,7 +208,7 @@ class Cliente(threading.Thread):
 
     def guardarJugada(self,punta_uno,punta_dos):
         if len(self.tablero) == 0:
-            self.tablero.extend(punta_uno, punta_dos)
+            self.tablero.extend([punta_uno, punta_dos])
         else:
             self.tablero.insert(0, punta_uno)
             self.tablero.apppend(punta_dos)

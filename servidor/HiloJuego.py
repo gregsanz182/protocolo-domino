@@ -38,7 +38,7 @@ class HiloJuego(threading.Thread):
         self.sockTCP.settimeout(5)
         tiempo_comienzo = time.time()
         countdown = False
-        while (time.time() - tiempo_comienzo) < 10 and len(self.jugadores) < 4:
+        while (time.time() - tiempo_comienzo) < 5 and len(self.jugadores) < 4:
             try:
                 conexion, direccion_cliente = self.sockTCP.accept()
                 if conexion:
@@ -86,11 +86,11 @@ class HiloJuego(threading.Thread):
         self.enviarBroadcast(mensajeJuego)
         while jugando:
             evento_pasado = self.esperarYrealizarJugada(jugadorTurno, tableroCola)
-            jugadorGanador, razon = self.validarFinRonda()
+            jugadorGanador, razon = self.validarFinRonda(tableroCola, jugadorTurno)
             if jugadorGanador:
                 mensajeJuego = {
                     'identificador': self.identificadorProtocolo,
-                    'jugador': jugadorGanador,
+                    'jugador': jugadorGanador.idenJugador,
                     'tipo': 1,
                     'puntuacion': self.calcularPuntuacion(jugadorGanador),
                     'razon': razon
@@ -100,7 +100,7 @@ class HiloJuego(threading.Thread):
                 jugadorTurno = self.jugadores[(self.jugadores.index(jugadorTurno)+1)%len(self.jugadores)]
                 mensajeJuego = {
                     'identificador': self.identificadorProtocolo,
-                    'jugador': jugadorTurno,
+                    'jugador': jugadorTurno.idenJugador,
                     'tipo': 0,
                     'punta_uno': tableroCola[0],
                     'punta_dos': tableroCola[len(tableroCola)-1],
@@ -147,7 +147,7 @@ class HiloJuego(threading.Thread):
                     'tipo': 2,
                     'jugador': jugador.idenJugador
                 }
-            ficha = jugador.verificarFicha(menJson['token'])
+            ficha = jugador.verificarFicha(menJson['ficha']['token'])
             evento_pasado = {
                 'jugador': jugador.idenJugador,
                 'ficha': {
@@ -211,7 +211,7 @@ class HiloJuego(threading.Thread):
                         if jugadorSiguiente.contarPintas() == minimo:
                             return jugadorSiguiente, "Menor cantidad de pintas"
 
-        return None
+        return None, None
 
     def validarTranca(self, tableroCola):
         if len(tableroCola) == 0:

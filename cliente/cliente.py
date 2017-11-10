@@ -197,13 +197,13 @@ class Cliente(threading.Thread):
                     pos = i
             return self.fichas[pos]['token'], False
         else:
-            cont = 0
-            while cont < len(self.fichas):
-                if self.fichas[cont]['entero_uno'] == self.tablero[0] or self.fichas[cont]['entero_dos'] == self.tablero[0]:
-                    return self.fichas[pos]['token'], True
-                if self.fichas[cont]['entero_uno'] == self.tablero[len(self.tablero)-1] or self.fichas[cont]['entero_dos'] == self.tablero[len(self.tablero)-1]:
-                    return self.fichas[pos]['token'], False
-                cont = cont + 1
+            if len(self.tablero) == 0:
+                return self.fichas[randrange(len(self.fichas))]['token'], False
+            for f in self.fichas:
+                if f['entero_uno'] == self.tablero[0] or f['entero_dos'] == self.tablero[0]:
+                    return f['token'], True
+                if f['entero_uno'] == self.tablero[len(self.tablero)-1] or f['entero_dos'] == self.tablero[len(self.tablero)-1]:
+                    return f['token'], False
             return None, None
 
     def guardarJugada(self,punta_uno,punta_dos):

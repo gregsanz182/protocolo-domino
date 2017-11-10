@@ -110,6 +110,8 @@ class HiloJuego(threading.Thread):
             for i, ficha in enumerate(tableroCola):
                 print('{0}{1}'.format(ficha, ':' if (i%2)==0 else '|'), end='')
             print('')
+            if mensajeJuego['tipo'] == 1:
+                print(mensajeJuego)
             self.enviarBroadcast(mensajeJuego)
             
     def repartirFichasYEnviar(self):

@@ -141,7 +141,7 @@ class Cliente(threading.Thread):
                 #-------------------------------------------------------MSJ TIPO 0----------------------------------------------------
                 if jugador == self.identificador_jugador and mensaje.get('tipo') == 0:
                     #-------------------------------------------------MSJ JUGADA NORMAL-----------------------------------------------
-                    if mensaje.get('punta_uno') != -1 and (mensaje.get('punta_dos') != -1 and mensaje.get('evento_pasado'):
+                    if mensaje.get('punta_uno') != -1 and (mensaje.get('punta_dos') != -1 and mensaje.get('evento_pasado')):
                         evento_pasado = mensaje['evento_pasado']
                         #-------------------------------JUGADA NORMAL--------GUARDANDO PUNTAS-----------------------------------------
                         if evento_pasado.get('tipo') == 0 and evento_pasado.get('jugador') and evento_pasado.get('ficha'):
@@ -149,7 +149,6 @@ class Cliente(threading.Thread):
                             self.fichas_jugadas.append(evento_pasado['ficha'])
 
                     ficha, punta = self.obtenerJugada(mensaje)
-                    print('token: {!r} punta: {!r} a jugar'.format(token,punta))
                     if ficha == None:
                         mensaje_TCP = {
                             "identificador": "DOMINOCOMUNICACIONESI",
@@ -166,6 +165,7 @@ class Cliente(threading.Thread):
                             },
                             "punta": punta
                         }
+                        print('token: {!r} punta: {!r} a jugar'.format(ficha['token'], punta))
                         self.fichas.remove(ficha)
                     try:
                         mensaje_envio = json.dumps(mensaje_TCP).encode('utf-8')
@@ -217,10 +217,7 @@ class Cliente(threading.Thread):
         else:
             self.tablero.insert(0, punta_uno)
             self.tablero.append(punta_dos)
-
-    def eliminarFicha(self,token):
         
-
 #--------------------------------------------MAIN-------------------------------------------------
 if __name__ == '__main__':
     conection = ('255.255.255.255', 3001)

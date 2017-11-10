@@ -46,8 +46,7 @@ class HiloJuego(threading.Thread):
                     mensaje = conexion.recv(4096)
                     print('{0} intenta conectarse'.format(direccion_cliente))
                     mensaje_json = json.loads(mensaje.decode('utf-8'))
-                    print(mensaje_json)
-                    if mensaje_json.get('identificador') == self.identificadorProtocolo and mensaje_json.get('nombre_jugador'):
+                    if mensaje_json.get('identificador') == self.identificadorProtocolo and 'nombre_jugador' in mensaje_json:
                         idenJugador = hashlib.md5(str(random.randrange(0, 3500)).encode('utf-8')).hexdigest()
                         respJson = self.jsonMulticast
                         respJson['jugador'] = idenJugador
@@ -142,7 +141,7 @@ class HiloJuego(threading.Thread):
         evento_pasado = {}
         mensaje = jugador.socketTCP.recv(4096)
         menJson = json.loads(mensaje.decode('utf-8'))
-        if menJson.get('identificador') == self.identificadorProtocolo and menJson.get('ficha').get('token'):
+        if menJson.get('identificador') == self.identificadorProtocolo and 'ficha' in menJson and 'token' in menJson['ficha']:
             if menJson['ficha']['token'] == -1:
                 return {
                     'tipo': 2,

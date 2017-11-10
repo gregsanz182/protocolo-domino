@@ -167,15 +167,30 @@ class HiloJuego(threading.Thread):
                 return True
         else:
             if ficha['entero_uno'] == tableroCola[len(tableroCola)-1]:
-                tableroCola.append(0, ficha['entero_uno'])
-                tableroCola.append(0, ficha['entero_dos'])
+                tableroCola.append(ficha['entero_uno'])
+                tableroCola.append(ficha['entero_dos'])
                 return True
             elif ficha['entero_dos'] == tableroCola[len(tableroCola)-1]:
-                tableroCola.append(0, ficha['entero_dos'])
-                tableroCola.append(0, ficha['entero_uno'])
+                tableroCola.append(ficha['entero_dos'])
+                tableroCola.append(ficha['entero_uno'])
                 return True
         return False
 
-    def validarFinRonda(self):
-        pass
+    def validarFinRonda(self, tableroCola, jugador):
+        #Dominó ronda
+        if len(jugador.fichas) == 0:
+            return jugador
+        return None
+ 
+        if self.validarTranca(tableroCola):
+            #Tranca y mejor jugador
+            cantidades = [len(player.fichas) for player in self.jugadores]
+
+    def validarTranca(self, tableroCola):
+        if len(tableroCola) == 0:
+            return False
+        for jugador in self.jugadores:
+            if jugador.disponibilidadPinta(tableroCola[0]) or jugador.disponibilidadPinta(tableroCola[len(tableroCola)-1])
+                return False
+        return True
         

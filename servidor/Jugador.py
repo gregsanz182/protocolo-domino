@@ -23,3 +23,12 @@ class Jugador():
             if ficha['token'] == tokenFicha:
                 return ficha
         return None
+
+    def contarPintas(self):
+        return sum([(ficha['entero_uno']+ficha['entero_dos']) for ficha in self.fichas])
+
+    def disponibilidadPinta(self, pinta):
+        for ficha in self.fichas:
+            if pinta in [ficha['entero_uno'], ficha['entero_dos']]:
+                return True
+        return False

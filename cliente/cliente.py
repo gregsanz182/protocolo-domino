@@ -141,18 +141,12 @@ class Cliente(threading.Thread):
                     #-------------------------------------------------------MSJ TIPO 0----------------------------------------------------
                     if int(mensaje.get('tipo')) == 0:
                         #-------------------------------------------------MSJ JUGADA NORMAL-----------------------------------------------
-                        if int(mensaje.get('entero_uno')) != -1 and int(mensaje.get('entero_uno')) != -1 and mensaje.get('evento_pasado'):
+                        if int(mensaje.get('punta_uno')) != -1 and int(mensaje.get('punta_dos')) != -1 and mensaje.get('evento_pasado'):
                             evento_pasado = mensaje['evento_pasado']
                             #-------------------------------JUGADA NORMAL--------GUARDANDO PUNTAS-----------------------------------------
                             if evento_pasado.get('tipo') == 0 and evento_pasado.get('jugador') and evento_pasado.get('ficha'):
-                                self.guardarJugada(evento_pasado['ficha']['entero_uno'], evento_pasado['ficha']['entero_dos'], evento_pasado['ficha']['punta'])
+                                self.guardarJugada(mensaje['punta_uno'], mensaje['punta_dos'])
                                 self.fichas_jugadas.append(evento_pasado['ficha'])
-                            #-----------------------------------------------JUGADA ERRONEA------------------------------------------------
-                            elif evento_pasado.get('tipo') == 1 and evento_pasado.get('jugador') and evento_pasado.get('ficha'):
-                                self.jugadas_erroneas.append(evento_pasado)
-                            #-----------------------------------------------JUGADADOR PASÓ------------------------------------------------
-                            elif evento_pasado.get('tipo') == 2 and evento_pasado.get('jugador'):
-                                self.jugador_retirado.append(evento_pasado['jugador'])
                             else:
                                 print('Mensaje interno invalido')
                         else:
@@ -180,19 +174,19 @@ class Cliente(threading.Thread):
                             mensaje_envio = json.dumps(mensaje_TCP).encode('utf-8')
                             self.sockTCP.sendall(mensaje_envio)
                         except socket.error:
+                            print('error de socket TCP')
                             self.sockTCP.close()
                     #-------------------------------------------------------MSJ TIPO 1----------------------------------------------------     
                     else:
-                        break    
+                        print('no es mensaje del tipo 0')
                 else:
-                    break           
+                    print('no es mi turno')
             else:
                 print('Mensaje erroneo')
-                break
         #--------------------------------------------------------------END WHILE----------------------------------------------------------
 
     def obtenerJugada(self, mensaje):
-        if int(mensaje.get('entero_uno')) == -1 and int(mensaje.get('entero_uno')) == -1 and self.ronda == 1:
+        if int(mensaje.get('punta_uno')) == -1 and int(mensaje.get('punta_dos')) == -1 and self.ronda == 1:
             x = 6
             suma = []
             aux = 0
@@ -216,23 +210,12 @@ class Cliente(threading.Thread):
                 cont = cont + 1
             return None, None
 
-    def guardarJugada(self,entero_uno,entero_dos,punta):
+    def guardarJugada(self,punta_uno,punta_dos):
         if len(self.tablero) == 0:
-            self.tablero.extend(entero_uno,entero_dos)
-        elif punta:
-            if entero_uno == self.tablero[0]:
-                self.tablero.insert(0, entero_uno)
-                self.tablero.insert(0, entero_dos)
-            elif entero_dos == self.tablero[0]:
-                self.tablero.insert(0, entero_dos)
-                self.tablero.insert(0, entero_uno)
+            self.tablero.extend(punta_uno, punta_dos)
         else:
-            if entero_uno == self.tablero[len(self.tablero)-1]:
-                self.tablero.apppend(entero_uno)
-                self.tablero.apppend(entero_dos)
-            elif entero_dos == self.tablero[len(self.tablero)-1]:
-                self.tablero.apppend(entero_dos)
-                self.tablero.apppend(entero_uno)
+            self.tablero.insert(0, punta_uno)
+            self.tablero.apppend(punta_dos)
 
 
 #--------------------------------------------MAIN-------------------------------------------------

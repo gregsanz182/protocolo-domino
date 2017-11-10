@@ -238,6 +238,9 @@ class Cliente(threading.Thread):
             elif entero_dos == self.tablero[len(self.tablero)-1]:
                 self.tablero.append(entero_dos)
                 self.tablero.append(entero_uno)
+        for i, f in enumerate(self.tablero):
+            print('{0}{1}'.format(f, ':' if(i%2)==0 else '|'), end='')
+        print('')
         
 #--------------------------------------------MAIN-------------------------------------------------
 if __name__ == '__main__':

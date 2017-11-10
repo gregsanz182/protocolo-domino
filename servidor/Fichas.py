@@ -32,3 +32,9 @@ class Fichas():
         for i in range(7):
             mano.append(self.randPop())
         return mano
+
+    def verificarFicha(self, tokenFicha):
+        for ficha in self.fichas:
+            if ficha['token'] == tokenFicha:
+                return ficha
+        return None

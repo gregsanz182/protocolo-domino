@@ -18,8 +18,8 @@ class Jugador():
         print(men)
         self.socketTCP.sendall(json.dumps(men).encode('utf-8'))
         
-    def verificarFicha(self, ficha):
+    def verificarFicha(self, tokenFicha):
         for ficha in self.fichas:
-            if ficha['entero_uno'] == ficha[0] and ficha['entero_dos'] == ficha[1]:
+            if ficha['token'] == tokenFicha:
                 return ficha
         return None

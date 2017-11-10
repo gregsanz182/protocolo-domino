@@ -82,9 +82,20 @@ class HiloJuego(threading.Thread):
             'punta_uno': -1,
             'punta_dos': -1
         }
+        tableroCola = []
         while True:
             self.enviarBroadcast(mensajeJuego)
-            self.esperarJugada()
+            evento_pasado = self.esperarYrealizarJugada(jugadorTurno, tableroCola)
+            self.validarFinRonda()
+            jugadorTurno = self.jugadores[(self.jugadores.index(jugadorTurno)+1)%len(self.jugadores)]
+            mensajeJuego = {
+                'identificador': self.identificadorProtocolo,
+                'jugador': jugadorTurno,
+                'tipo': 0,
+                'punta_uno': tableroCola[0],
+                'punta_dos': tableroCola[len(tableroCola)-1],
+                'evento_pasado': evento_pasado
+            }
 
             
     def repartirFichasYEnviar(self):
@@ -115,8 +126,56 @@ class HiloJuego(threading.Thread):
     def enviarBroadcast(self, data):
         self.sockMulticast.sendto(json.dumps(data).encode('utf-8'), self.multicastendpoint)
 
-    def esperarJugada(self, jugador):
+    def esperarYrealizarJugada(self, jugador, tableroCola):
+        evento_pasado = {}
         mensaje = jugador.socketTCP.recv(4096)
         menJson = json.loads(mensaje.decode('utf-8'))
-        if menJson.get('identificador') == self.identificadorProtocolo and menJson.get('ficha').get('token') and menJson.get('punta'):
-            if jugador.verificarFicha((menJson['ficha'][entero]))
+        if menJson.get('identificador') == self.identificadorProtocolo and menJson.get('ficha').get('token'):
+            if menJson['ficha']['token'] == -1:
+                return {
+                    'tipo': 2,
+                    'jugador': jugador.idenJugador
+                }
+            ficha = jugador.verificarFicha(menJson['token'])
+            evento_pasado = {
+                'jugador': jugador.idenJugador,
+                'ficha': {
+                    'entero_uno': ficha['entero_uno'],
+                    'entero_dos': ficha['entero_dos'],
+                    'punta': menJson['punta']
+                }
+            }
+            if self.realizarJugada(tableroCola, ficha, menJson['punta']):
+                evento_pasado['tipo'] = 0
+            else:
+                evento_pasado['tipo'] = 1
+            return evento_pasado
+
+
+    def realizarJugada(self, tableroCola, ficha, punta):
+        if len(tableroCola) == 0:
+                tableroCola.extend([ficha['entero_uno'], ficha['entero_dos'])
+                return True
+        elif punta:
+            if ficha['entero_dos'] == tableroCola[0]:
+                tableroCola.insert(0, ficha['entero_dos'])
+                tableroCola.insert(0, ficha['entero_uno'])
+                return True
+            elif ficha['entero_uno'] == tableroCola[0]:
+                tableroCola.insert(0, ficha['entero_uno'])
+                tableroCola.insert(0, ficha['entero_dos'])
+                return True
+        else:
+            if ficha['entero_uno'] == tableroCola[len(tableroCola)-1]:
+                tableroCola.append(0, ficha['entero_uno'])
+                tableroCola.append(0, ficha['entero_dos'])
+                return True
+            elif ficha['entero_dos'] == tableroCola[len(tableroCola)-1]:
+                tableroCola.append(0, ficha['entero_dos'])
+                tableroCola.append(0, ficha['entero_uno'])
+                return True
+        return False
+
+    def validarFinRonda(self):
+        pass
+        

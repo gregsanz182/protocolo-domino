@@ -181,6 +181,13 @@ class Cliente(threading.Thread):
                         print('Razón: {!r}'.format(mensaje['razon']))
                         print('Siguiente ronda: {!r}'.format(self.ronda))
                     #-------------------------------------------------------MSJ TIPO 1----------------------------------------------------
+                elif mensaje.get('tipo') == 0:
+                    if mensaje.get('punta_uno') != -1 and (mensaje.get('punta_dos') != -1 and mensaje.get('evento_pasado')):
+                        evento_pasado = mensaje['evento_pasado']
+                        #-----------------------------------JUGADA NORMAL--------GUARDANDO PUNTAS-----------------------------------------
+                        if evento_pasado.get('tipo') == 0 and evento_pasado.get('jugador') and evento_pasado.get('ficha'):
+                            self.guardarJugada(evento_pasado['ficha']['entero_uno'], evento_pasado['ficha']['entero_dos'], evento_pasado['ficha']['punta'])
+                            self.fichas_jugadas.append(evento_pasado['ficha'])
                 elif mensaje.get('tipo') == 1:
                     self.ronda = self.ronda + 1
                     print('...Ronda Finalizada...')

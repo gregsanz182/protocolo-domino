@@ -135,13 +135,13 @@ class Cliente(threading.Thread):
             data, address = sockUDP.recvfrom(4096)
             mensaje = json.loads(data.decode('utf-8'))
             print('mensaje multicast: {!r}'.format(mensaje))
-            if mensaje.get('identificador') == 'DOMINOCOMUNICACIONESI' and mensaje.get('jugador') and mensaje.get('tipo'):
+            if mensaje.get('identificador') == 'DOMINOCOMUNICACIONESI' and mensaje.get('jugador') and 'tipo' in mensaje:
                 jugador = mensaje['jugador']
                 if jugador == self.identificador_jugador:
                     #-------------------------------------------------------MSJ TIPO 0----------------------------------------------------
-                    if int(mensaje.get('tipo')) == 0:
+                    if mensaje.get('tipo') == 0:
                         #-------------------------------------------------MSJ JUGADA NORMAL-----------------------------------------------
-                        if int(mensaje.get('punta_uno')) != -1 and int(mensaje.get('punta_dos')) != -1 and mensaje.get('evento_pasado'):
+                        if mensaje.get('punta_uno') != -1 and (mensaje.get('punta_dos') != -1 and mensaje.get('evento_pasado'):
                             evento_pasado = mensaje['evento_pasado']
                             #-------------------------------JUGADA NORMAL--------GUARDANDO PUNTAS-----------------------------------------
                             if evento_pasado.get('tipo') == 0 and evento_pasado.get('jugador') and evento_pasado.get('ficha'):
@@ -186,16 +186,16 @@ class Cliente(threading.Thread):
         #--------------------------------------------------------------END WHILE----------------------------------------------------------
 
     def obtenerJugada(self, mensaje):
-        if int(mensaje.get('punta_uno')) == -1 and int(mensaje.get('punta_dos')) == -1 and self.ronda == 1:
+        if mensaje.get('punta_uno') == -1 and mensaje.get('punta_dos') == -1 and self.ronda == 1:
             x = 6
             suma = []
             aux = 0
             pos = 0
             for i, f in enumerate(self.fichas):
-                if int(f['entero_uno']) == x and int(f['entero_dos']) == x:
+                if f['entero_uno'] == x and f['entero_dos'] == x:
                     return f['token'], False
                 x = x - 1
-                suma.append(int(f['entero_uno']) + int(f['entero_dos']))
+                suma.append(f['entero_uno'] + f['entero_dos'])
                 if suma[i] > aux:
                     aux = suma[i]
                     pos = i

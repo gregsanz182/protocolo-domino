@@ -148,9 +148,9 @@ class Cliente(threading.Thread):
                             self.guardarJugada(mensaje['punta_uno'], mensaje['punta_dos'])
                             self.fichas_jugadas.append(evento_pasado['ficha'])
 
-                    token, punta = self.obtenerJugada(mensaje)
+                    ficha, punta = self.obtenerJugada(mensaje)
                     print('token: {!r} punta: {!r} a jugar'.format(token,punta))
-                    if token == None:
+                    if ficha == None:
                         mensaje_TCP = {
                             "identificador": "DOMINOCOMUNICACIONESI",
                             "ficha": {
@@ -162,10 +162,11 @@ class Cliente(threading.Thread):
                         mensaje_TCP = {
                             "identificador": "DOMINOCOMUNICACIONESI",
                             "ficha": {
-                                "token": token
+                                "token": ficha['token']
                             },
                             "punta": punta
                         }
+                        self.fichas.remove(ficha)
                     try:
                         mensaje_envio = json.dumps(mensaje_TCP).encode('utf-8')
                         self.sockTCP.sendall(mensaje_envio)
@@ -173,6 +174,11 @@ class Cliente(threading.Thread):
                         print('error de socket TCP')
                         self.sockTCP.close()
                     #-------------------------------------------------------MSJ TIPO 1----------------------------------------------------
+                elif mensaje.get('tipo') == 1:
+                    self.ronda = self.ronda + 1
+                    print('el fugador que gano la ronda es: {!r} con una puntuacion de: {!r}'.format(jugador,mensaje['puntuacion']))
+                    print('por la razon: {!r}'.format(mensaje['razon']))
+                    print('sigue la ronda: {!r}',self.ronda)
                 else:
                     print('no es mi turno')
             else:
@@ -188,30 +194,32 @@ class Cliente(threading.Thread):
             pos = 0
             for i, f in enumerate(self.fichas):
                 if f['entero_uno'] == x and f['entero_dos'] == x:
-                    return f['token'], False
+                    return f, False
                 x = x - 1
                 suma.append(f['entero_uno'] + f['entero_dos'])
                 if suma[i] > aux:
                     aux = suma[i]
                     pos = i
-            return self.fichas[pos]['token'], False
+            return self.fichas[pos], False
         else:
-            cont = 0
-            while cont < len(self.fichas):
-                if self.fichas[cont]['entero_uno'] == self.tablero[0] or self.fichas[cont]['entero_dos'] == self.tablero[0]:
-                    return self.fichas[pos]['token'], True
-                if self.fichas[cont]['entero_uno'] == self.tablero[len(self.tablero)-1] or self.fichas[cont]['entero_dos'] == self.tablero[len(self.tablero)-1]:
-                    return self.fichas[pos]['token'], False
-                cont = cont + 1
+            if len(self.tablero) == 0:
+                return self.fichas[randrange(len(self.fichas))], False
+            for f in self.fichas:
+                if f['entero_uno'] == self.tablero[0] or f['entero_dos'] == self.tablero[0]:
+                    return f, True
+                if f['entero_uno'] == self.tablero[len(self.tablero)-1] or f['entero_dos'] == self.tablero[len(self.tablero)-1]:
+                    return f, False
             return None, None
 
     def guardarJugada(self,punta_uno,punta_dos):
         if len(self.tablero) == 0:
-            self.tablero.extend(punta_uno, punta_dos)
+            self.tablero.extend([punta_uno, punta_dos])
         else:
             self.tablero.insert(0, punta_uno)
             self.tablero.apppend(punta_dos)
 
+    def eliminarFicha(self,token):
+        
 
 #--------------------------------------------MAIN-------------------------------------------------
 if __name__ == '__main__':

@@ -131,6 +131,7 @@ class Cliente(threading.Thread):
         self.sockTCP.close()
 
     def jugar(self,sockUDP):
+        gameover = False
         while True:
             #-------------------------------------------------------------MSJ MULTICAST---------------------------------------------------
             data, address = sockUDP.recvfrom(4096)
@@ -175,13 +176,24 @@ class Cliente(threading.Thread):
                             self.sockTCP.close()
                     elif mensaje.get('tipo') == 1:
                         self.ronda = self.ronda + 1
+                        self.puntuacion = self.puntuacion + mensaje['puntuacion']
                         print('...Ronda Finalizada...')
                         print('YUPIIIIIIIIIIIII GANE LA RONDA')
-                        print('Puntuacion: {!r}'.format(mensaje['puntuacion']))
+                        print('Puntuacion: {!r}'.format(self.puntuacion))
                         print('Razón: {!r}'.format(mensaje['razon']))
                         print('Siguiente ronda: {!r}'.format(self.ronda))
+                    elif mensaje.get('tipo') == 2:
+                        print('...Fin de la partida...')
+                        print('YUPIIIIIIIIIIIII GANE LA PARTIDA')
+                        print('Puntuacion: {!r}'.format(self.puntuacion))
+                        print('Puntuación general')
+                        for j in mensaje['puntuacion_general']:
+                            print('Jugador: {!r} puntuación: {!r}'.format(j['jugador'], j['puntuacion']))
+                        print('Razón: {!r}'.format(mensaje['razon']))
+                        gameover = True
                     #-------------------------------------------------------MSJ TIPO 1----------------------------------------------------
                 elif mensaje.get('tipo') == 0:
+                    print('no es mi turno')
                     if mensaje.get('punta_uno') != -1 and (mensaje.get('punta_dos') != -1 and mensaje.get('evento_pasado')):
                         evento_pasado = mensaje['evento_pasado']
                         #-----------------------------------JUGADA NORMAL--------GUARDANDO PUNTAS-----------------------------------------
@@ -192,12 +204,19 @@ class Cliente(threading.Thread):
                     self.ronda = self.ronda + 1
                     print('...Ronda Finalizada...')
                     print('No ganaste, tal vez la próxima')
-                    print('Jugador Ganador: {!r}'.format(jugador))
+                    print('Ganador: {!r}'.format(jugador))
                     print('Puntuacion: {!r}'.format(mensaje['puntuacion']))
                     print('Razón: {!r}'.format(mensaje['razon']))
                     print('Siguiente ronda: {!r}'.format(self.ronda))
+                elif mensaje.get('tipo') == 2:
+                    print('...Fin de la partida...')
+                    print('Ganador{!r}'.format(jugador))
+                    print('Puntuación general')
+                    for j in mensaje['puntuacion_general']:
+                        print('Jugador: {!r} puntuación: {!r}'.format(j['jugador'], j['puntuacion']))
+                    print('Razón: {!r}'.format(mensaje['razon']))
+                    gameover = True
                 else:
-                    print('no es mi turno')
             else:
                 print('Mensaje erroneo')
         #--------------------------------------------------------------END WHILE----------------------------------------------------------

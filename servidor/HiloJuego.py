@@ -180,11 +180,27 @@ class HiloJuego(threading.Thread):
         #Dominó ronda
         if len(jugador.fichas) == 0:
             return jugador
-        return None
- 
+        
+        #Tranca
         if self.validarTranca(tableroCola):
-            #Tranca y mejor jugador
-            cantidades = [len(player.fichas) for player in self.jugadores]
+            cantidades = [player.contarPintas() for player in self.jugadores]
+            minimo = min(cantidades)
+
+            #El jugador con menor pintas
+            if cantidades.count(minimo) == 1:
+                return self.jugadores[cantidades.index(minimo)]
+            else:
+                #El que trancó
+                if jugador.contarPintas() == minimo:
+                    return jugador
+                else:
+                    c = 1
+                    while True:
+                        jugadorSiguiente = self.jugadores[(self.jugadores.index(jugador)+c)%len(self.jugadores)]
+                        if jugadorSiguiente.contarPintas() == minimo:
+                            return jugadorSiguiente
+
+        return None
 
     def validarTranca(self, tableroCola):
         if len(tableroCola) == 0:

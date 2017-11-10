@@ -145,7 +145,7 @@ class Cliente(threading.Thread):
                             evento_pasado = mensaje['evento_pasado']
                             #-----------------------------------JUGADA NORMAL--------GUARDANDO PUNTAS-----------------------------------------
                             if evento_pasado.get('tipo') == 0 and evento_pasado.get('jugador') and evento_pasado.get('ficha'):
-                                self.guardarJugada(mensaje['punta_uno'], mensaje['punta_dos'])
+                                self.guardarJugada(evento_pasado['ficha']['entero_uno'], evento_pasado['ficha']['entero_dos'], evento_pasado['ficha']['punta'])
                                 self.fichas_jugadas.append(evento_pasado['ficha'])
 
                         ficha, punta = self.obtenerJugada(mensaje)
@@ -221,12 +221,23 @@ class Cliente(threading.Thread):
                     return f, False
             return None, None
 
-    def guardarJugada(self,punta_uno,punta_dos):
+    def guardarJugada(self,entero_uno,entero_dos,punta):
         if len(self.tablero) == 0:
-            self.tablero.extend([punta_uno, punta_dos])
+                self.tablero.extend([entero_uno, entero_dos])
+        elif punta:
+            if entero_uno == self.tablero[0]:
+                self.tablero.insert(0, entero_uno)
+                self.tablero.insert(0, entero_dos)
+            elif entero_dos == self.tablero[0]:
+                self.tablero.insert(0, entero_dos)
+                self.tablero.insert(0, entero_uno)
         else:
-            self.tablero.insert(0, punta_uno)
-            self.tablero.append(punta_dos)
+            if entero_uno == self.tablero[len(self.tablero)-1]:
+                self.tablero.append(entero_uno)
+                self.tablero.append(entero_dos)
+            elif entero_dos == self.tablero[len(self.tablero)-1]:
+                self.tablero.append(entero_dos)
+                self.tablero.append(entero_uno)
         
 #--------------------------------------------MAIN-------------------------------------------------
 if __name__ == '__main__':

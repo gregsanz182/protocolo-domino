@@ -209,9 +209,9 @@ class Cliente(threading.Thread):
         else:
             cont = 0
             while cont < len(self.fichas):
-                if self.fichas[cont]['entero_uno'] == self.tablero[0] or self.fichas[cont]['entero_dos'] == self.tablero[0]
+                if self.fichas[cont]['entero_uno'] == self.tablero[0] or self.fichas[cont]['entero_dos'] == self.tablero[0]:
                     return self.fichas[pos]['token'], True
-                if self.fichas[cont]['entero_uno'] == self.tablero[len(self.tablero)-1] or self.fichas[cont]['entero_dos'] == self.tablero[len(self.tablero)-1]
+                if self.fichas[cont]['entero_uno'] == self.tablero[len(self.tablero)-1] or self.fichas[cont]['entero_dos'] == self.tablero[len(self.tablero)-1]:
                     return self.fichas[pos]['token'], False
                 cont = cont + 1
             return None, None

@@ -166,7 +166,7 @@ class HiloJuego(threading.Thread):
 
     def realizarJugada(self, tableroCola, ficha, punta):
         if len(tableroCola) == 0:
-                tableroCola.extend([ficha['entero_uno'], ficha['entero_dos'])
+                tableroCola.extend([ficha['entero_uno'], ficha['entero_dos']])
                 return True
         elif punta:
             if ficha['entero_dos'] == tableroCola[0]:
@@ -218,7 +218,7 @@ class HiloJuego(threading.Thread):
         if len(tableroCola) == 0:
             return False
         for jugador in self.jugadores:
-            if jugador.disponibilidadPinta(tableroCola[0]) or jugador.disponibilidadPinta(tableroCola[len(tableroCola)-1])
+            if jugador.disponibilidadPinta(tableroCola[0]) or jugador.disponibilidadPinta(tableroCola[len(tableroCola)-1]):
                 return False
         return True
     

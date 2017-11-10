@@ -55,7 +55,7 @@ class HiloJuego(threading.Thread):
                         print("El jugador {0} se ha conectado bajo la direccion {1}".format(mensaje_json['nombre_jugador'], direccion_cliente))
                         self.jugadores.append(Jugador(mensaje_json['nombre_jugador'], idenJugador, direccion_cliente, conexion))
                         tiempo_comienzo = time.time()
-                        if len(self.jugadores) == 1:
+                        if len(self.jugadores) == 2:
                             countdown = True
             except (socket.timeout, ValueError):
                 pass
@@ -135,6 +135,7 @@ class HiloJuego(threading.Thread):
         return jugador
 
     def enviarBroadcast(self, data):
+        print(json.dumps(data))
         self.sockMulticast.sendto(json.dumps(data).encode('utf-8'), self.multicastendpoint)
 
     def esperarYrealizarJugada(self, jugador, tableroCola):

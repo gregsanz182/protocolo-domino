@@ -83,20 +83,31 @@ class HiloJuego(threading.Thread):
             'punta_dos': -1
         }
         tableroCola = []
-        while True:
-            self.enviarBroadcast(mensajeJuego)
+        jugando = True
+        self.enviarBroadcast(mensajeJuego)
+        while jugando:
             evento_pasado = self.esperarYrealizarJugada(jugadorTurno, tableroCola)
-            self.validarFinRonda()
-            jugadorTurno = self.jugadores[(self.jugadores.index(jugadorTurno)+1)%len(self.jugadores)]
-            mensajeJuego = {
-                'identificador': self.identificadorProtocolo,
-                'jugador': jugadorTurno,
-                'tipo': 0,
-                'punta_uno': tableroCola[0],
-                'punta_dos': tableroCola[len(tableroCola)-1],
-                'evento_pasado': evento_pasado
-            }
-
+            jugadorGanador, razon = self.validarFinRonda()
+            if jugadorGanador:
+                mensajeJuego = {
+                    'identificador': self.identificadorProtocolo,
+                    'jugador': jugadorGanador,
+                    'tipo': 1,
+                    'puntuacion': self.calcularPuntuacion(jugadorGanador),
+                    'razon': razon
+                }
+                jugando = False
+            else:
+                jugadorTurno = self.jugadores[(self.jugadores.index(jugadorTurno)+1)%len(self.jugadores)]
+                mensajeJuego = {
+                    'identificador': self.identificadorProtocolo,
+                    'jugador': jugadorTurno,
+                    'tipo': 0,
+                    'punta_uno': tableroCola[0],
+                    'punta_dos': tableroCola[len(tableroCola)-1],
+                    'evento_pasado': evento_pasado
+                }
+            self.enviarBroadcast(mensajeJuego)
             
     def repartirFichasYEnviar(self):
         self.fichasRonda = Fichas(1, [jugador.nombre for jugador in self.jugadores])
@@ -179,7 +190,7 @@ class HiloJuego(threading.Thread):
     def validarFinRonda(self, tableroCola, jugador):
         #Dominó ronda
         if len(jugador.fichas) == 0:
-            return jugador
+            return jugador, "Dominó la ronda"
         
         #Tranca
         if self.validarTranca(tableroCola):
@@ -188,17 +199,17 @@ class HiloJuego(threading.Thread):
 
             #El jugador con menor pintas
             if cantidades.count(minimo) == 1:
-                return self.jugadores[cantidades.index(minimo)]
+                return self.jugadores[cantidades.index(minimo)], "Menor cantidad de pintas"
             else:
                 #El que trancó
                 if jugador.contarPintas() == minimo:
-                    return jugador
+                    return jugador, "Menor cantidad de pintas y que trancó"
                 else:
                     c = 1
                     while True:
                         jugadorSiguiente = self.jugadores[(self.jugadores.index(jugador)+c)%len(self.jugadores)]
                         if jugadorSiguiente.contarPintas() == minimo:
-                            return jugadorSiguiente
+                            return jugadorSiguiente, "Menor cantidad de pintas"
 
         return None
 
@@ -209,4 +220,11 @@ class HiloJuego(threading.Thread):
             if jugador.disponibilidadPinta(tableroCola[0]) or jugador.disponibilidadPinta(tableroCola[len(tableroCola)-1])
                 return False
         return True
+    
+    def calcularPuntuacion(self, jugador):
+        suma = 0
+        for player in self.jugadores:
+            if player != jugador:
+                suma += player.contarPintas()
         
+        return suma

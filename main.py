@@ -2,6 +2,7 @@ import sys
 import random
 from PyQt5.QtWidgets import QApplication, QMainWindow, QWidget, QFrame, QStyle
 from ZonaJuego import ZonaJuego
+from PanelJugador import PanelJugador
 
 class MainWindow(QMainWindow):
 
@@ -17,13 +18,15 @@ class MainWindow(QMainWindow):
         self.zonaJuego = ZonaJuego(self)
 
         for i in range(0, 28):
-            self.zonaJuego.ponerFicha(random.randint(0, 6), random.randint(0, 6), 0)
+            self.zonaJuego.ponerFicha(-1, -1, 0)
         for i in range(0, 28):
             self.zonaJuego.ponerFicha(random.randint(0, 6), random.randint(0, 6), 1)
 
+        PanelJugador('hola', 0, padre=self)
+        PanelJugador('hola', 1, padre=self)
+        PanelJugador('hola', 2, padre=self)
+        PanelJugador('hola', 3, padre=self)
         
-
-
     def setWidgetCentral(self):
         self.widgetCentral = QFrame()
         self.setCentralWidget(self.widgetCentral)

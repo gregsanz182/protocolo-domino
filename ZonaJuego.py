@@ -8,7 +8,7 @@ class ZonaJuego(QFrame):
         self.ancho = 744
         self.alto = 402
         self.x = 103
-        self.y = 110
+        self.y = 100
         self.fichas = []
 
         self.setGeometry(self.x, self.y, self.ancho, self.alto)

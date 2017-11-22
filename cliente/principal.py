@@ -270,7 +270,7 @@ class Cliente(threading.Thread):
         
 #--------------------------------------------MAIN-------------------------------------------------
 if __name__ == '__main__':
-    conection = ('0.0.0.0', 3001)
+    conection = ('255.255.255.255', 3001)
     nombre = 'Anny Chacón'
     try:
         lock = threading.Lock()

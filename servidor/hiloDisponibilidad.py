@@ -20,13 +20,11 @@ class HiloDisponibilidad(threading.Thread):
 
         print('Identificandose en {} por el puerto {}'.format(*self.UDPendpoint))
 
-        self.sockUDP.bind(self.UDPendpoint)
-
         while self.activo:
             try:
-                self.sockUDP.sendto(json.dumps(self.mesaJson).encode('utf-8'), direccion)
+                self.sockUDP.sendto(json.dumps(self.mesaJson).encode('utf-8'), self.UDPendpoint)
                 time.sleep(5);
-            except socket.timeout:
+            except socket.error:
                 pass
         
         self.sockUDP.close()
@@ -34,6 +32,4 @@ class HiloDisponibilidad(threading.Thread):
     def inicializar(self):
         self.sockUDP = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         self.sockUDP.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)
-        self.sockUDP.settimeout(5)
-        self.sockUDP.setblocking(True)
         self.activo = True

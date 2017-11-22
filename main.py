@@ -1,5 +1,7 @@
 import sys
+import random
 from PyQt5.QtWidgets import QApplication, QMainWindow, QWidget, QFrame, QStyle
+from ZonaJuego import ZonaJuego
 
 class MainWindow(QMainWindow):
 
@@ -12,6 +14,15 @@ class MainWindow(QMainWindow):
         self.setFixedWidth(self.ancho)
         self.setFixedHeight(self.alto)
         self.setWidgetCentral()
+        self.zonaJuego = ZonaJuego(self)
+
+        for i in range(0, 28):
+            self.zonaJuego.ponerFicha(random.randint(0, 6), random.randint(0, 6), 0)
+        for i in range(0, 28):
+            self.zonaJuego.ponerFicha(random.randint(0, 6), random.randint(0, 6), 1)
+
+        
+
 
     def setWidgetCentral(self):
         self.widgetCentral = QFrame()
@@ -19,7 +30,7 @@ class MainWindow(QMainWindow):
         self.widgetCentral.setFixedHeight(self.alto)
         self.widgetCentral.setFixedWidth(self.ancho)
         self.widgetCentral.setFrameStyle(QFrame.StyledPanel)
-        self.widgetCentral.setStyleSheet('background-image: url(res/background.png); border: 4px solid #736427;')
+        self.widgetCentral.setStyleSheet('background-image: url(res/background.png); border: 5px solid #736427;')
 
 
 

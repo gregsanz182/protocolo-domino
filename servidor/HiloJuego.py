@@ -29,12 +29,12 @@ class HiloJuego(threading.Thread):
 
     def run(self):
         self.lobby()
-        self.iniciarRonda()
+        self.iniciarPartida()
 
     def lobby(self):
-        self.escucharUDP()
+        self.enviarUDP()
         self.sockTCP.bind(self.TCPendpoint)
-        self.sockTCP.listen(1)
+        self.sockTCP.listen(4)
         self.sockTCP.settimeout(5)
         tiempo_comienzo = time.time()
         countdown = False
@@ -64,63 +64,77 @@ class HiloJuego(threading.Thread):
         
         self.detenerUDP()
     
-    def escucharUDP(self):
+    def enviarUDP(self):
         self.disp.start()
 
     def detenerUDP(self):
         self.disp.activo = False
 
-    def iniciarRonda(self):
-        print("Iniciando Ronda")
-        self.repartirFichasYEnviar()
-        jugadorTurno = self.jugadorInicial()
+    def iniciarPartida(self):
+        print("Iniciando Partida")
+        jugadoresInicioPartida = self.getJugadores();
         mensajeJuego = {
             'identificador': self.identificadorProtocolo,
-            'jugador': jugadorTurno.idenJugador,
             'tipo': 0,
-            'punta_uno': -1,
-            'punta_dos': -1
+            'jugadores': [
+                
+            ]
         }
-        tableroCola = []
-        jugando = True
-        self.enviarBroadcast(mensajeJuego)
-        while jugando:
-            evento_pasado = self.esperarYrealizarJugada(jugadorTurno, tableroCola)
-            time.sleep(2)
-            jugadorGanador, razon = self.validarFinRonda(tableroCola, jugadorTurno)
-            if jugadorGanador:
-                mensajeJuego = {
-                    'identificador': self.identificadorProtocolo,
-                    'jugador': jugadorGanador.idenJugador,
-                    'tipo': 1,
-                    'puntuacion': self.calcularPuntuacion(jugadorGanador),
-                    'razon': razon
-                }
-                jugando = False
-            else:
-                jugadorTurno = self.jugadores[(self.jugadores.index(jugadorTurno)+1)%len(self.jugadores)]
-                mensajeJuego = {
-                    'identificador': self.identificadorProtocolo,
-                    'jugador': jugadorTurno.idenJugador,
-                    'tipo': 0,
-                    'punta_uno': tableroCola[0],
-                    'punta_dos': tableroCola[len(tableroCola)-1],
-                    'evento_pasado': evento_pasado
-                }
-            print('|', end='')
-            for i, ficha in enumerate(tableroCola):
-                print('{0}{1}'.format(ficha, ':' if (i%2)==0 else '|'), end='')
-            print('')
-            if mensajeJuego['tipo'] == 1:
-                print(mensajeJuego)
+        while True:
+            self.repartirFichasYEnviar()
+            jugadorTurno = self.jugadorInicial()
+            mensajeJuego = {
+                'identificador': self.identificadorProtocolo,
+                'jugador': jugadorTurno.idenJugador,
+                'tipo': 0,
+                'punta_uno': -1,
+                'punta_dos': -1
+            }
+            tableroCola = []
+            jugando = True
             self.enviarBroadcast(mensajeJuego)
+            while jugando:
+                evento_pasado = self.esperarYrealizarJugada(jugadorTurno, tableroCola)
+                time.sleep(2)
+                jugadorGanador, razon = self.validarFinRonda(tableroCola, jugadorTurno)
+                if jugadorGanador:
+                    mensajeJuego = {
+                        'identificador': self.identificadorProtocolo,
+                        'jugador': jugadorGanador.idenJugador,
+                        'tipo': 1,
+                        'puntuacion': self.calcularPuntuacion(jugadorGanador),
+                        'razon': razon
+                    }
+                    jugando = False
+                else:
+                    jugadorTurno = self.jugadores[(self.jugadores.index(jugadorTurno)+1)%len(self.jugadores)]
+                    mensajeJuego = {
+                        'identificador': self.identificadorProtocolo,
+                        'jugador': jugadorTurno.idenJugador,
+                        'tipo': 0,
+                        'punta_uno': tableroCola[0],
+                        'punta_dos': tableroCola[len(tableroCola)-1],
+                        'evento_pasado': evento_pasado
+                    }
+                print('|', end='')
+                for i, ficha in enumerate(tableroCola):
+                    print('{0}{1}'.format(ficha, ':' if (i%2)==0 else '|'), end='')
+                print('')
+                if mensajeJuego['tipo'] == 1:
+                    print(mensajeJuego)
+                self.enviarBroadcast(mensajeJuego)
             
     def repartirFichasYEnviar(self):
         self.fichasRonda = Fichas(1, [jugador.nombre for jugador in self.jugadores])
         for jugador in self.jugadores:
-            jugador.fichas = self.fichasRonda.tomarMano()
+            jugador.fichas = self.fichasRonda.repartirFichas()
         for jugador in self.jugadores:
             jugador.enviarFicha(self.identificadorProtocolo)
+
+    def getJugadores(self):
+        cad = ""
+        for jugador in self.jugadores:
+            cad += jugador.nombre+","
 
     def jugadorInicial(self):
         player = None

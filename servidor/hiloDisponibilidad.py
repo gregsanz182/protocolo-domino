@@ -9,7 +9,7 @@ class HiloDisponibilidad(threading.Thread):
     def __init__(self, identificadorProtocolo):
         super().__init__()
         self.identificadorProtocolo = identificadorProtocolo
-        self.UDPendpoint = ('0.0.0.0', 3001)
+        self.UDPendpoint = ('255.255.255.255', 3001)
         self.mesaJson = {
             'identificador': 'DOMINOCOMUNICACIONESI',
             'nombre_mesa': 'la que más aplaude'
@@ -24,11 +24,8 @@ class HiloDisponibilidad(threading.Thread):
 
         while self.activo:
             try:
-                mensaje, direccion = self.sockUDP.recvfrom(4096)
-                if mensaje:
-                    msg = json.loads(mensaje.decode('utf-8'))
-                    if msg.get('identificador') == self.identificadorProtocolo and self.activo:
-                        self.sockUDP.sendto(json.dumps(self.mesaJson).encode('utf-8'), direccion)
+                self.sockUDP.sendto(json.dumps(self.mesaJson).encode('utf-8'), direccion)
+                time.sleep(5);
             except socket.timeout:
                 pass
         

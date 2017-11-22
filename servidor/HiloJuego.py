@@ -220,7 +220,7 @@ class HiloJuego(threading.Thread):
                     while True:
                         jugadorSiguiente = self.jugadores[(self.jugadores.index(jugador)+c)%len(self.jugadores)]
                         if jugadorSiguiente.contarPintas() == minimo:
-                            return jugadorSiguiente, "Menor cantidad de pintas"
+                            return jugadorSiguiente, "Menor cantidad de pintas prox. al que trancó"
 
         return None, None
 

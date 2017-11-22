@@ -13,6 +13,7 @@ class Jugador():
     def enviarFicha(self, identificador):
         men = {
             'identificador': identificador,
+            'tipo': 2,
             'fichas': self.fichas
         }
         self.socketTCP.sendall(json.dumps(men).encode('utf-8'))

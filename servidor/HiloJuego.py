@@ -29,7 +29,7 @@ class HiloJuego(threading.Thread):
 
     def run(self):
         self.lobby()
-        self.iniciarPartida()
+        self.iniciarjuego()
 
     def lobby(self):
         self.enviarUDP()
@@ -70,29 +70,37 @@ class HiloJuego(threading.Thread):
     def detenerUDP(self):
         self.disp.activo = False
 
-    def iniciarPartida(self):
+    def iniciarjuego(self):
         print("Iniciando Partida")
-        jugadoresInicioPartida = self.getJugadores();
+        self.ronda = 1;
         mensajeJuego = {
             'identificador': self.identificadorProtocolo,
             'tipo': 0,
-            'jugadores': [
-                
-            ]
+            'jugadores': []
         }
+        for jugador in self.jugadores:
+            mensajeJuego['jugadores'].append({'identificador':jugador.idenJugador,'nombre':jugador.nombre})
+        self.enviarMulticast(mensajeJuego)
         while True:
+            print("Iniciando Ronda #{}".format(self.ronda))
+            mensajeJuego = {
+                'identificador': self.identificadorProtocolo,
+                'tipo': 1,
+                'ronda': self.ronda
+            }
+            self.enviarMulticast(mensajeJuego)
             self.repartirFichasYEnviar()
             jugadorTurno = self.jugadorInicial()
             mensajeJuego = {
                 'identificador': self.identificadorProtocolo,
                 'jugador': jugadorTurno.idenJugador,
-                'tipo': 0,
+                'tipo': 3,
                 'punta_uno': -1,
                 'punta_dos': -1
             }
             tableroCola = []
             jugando = True
-            self.enviarBroadcast(mensajeJuego)
+            self.enviarMulticast(mensajeJuego)
             while jugando:
                 evento_pasado = self.esperarYrealizarJugada(jugadorTurno, tableroCola)
                 time.sleep(2)
@@ -122,7 +130,7 @@ class HiloJuego(threading.Thread):
                 print('')
                 if mensajeJuego['tipo'] == 1:
                     print(mensajeJuego)
-                self.enviarBroadcast(mensajeJuego)
+                self.enviarMulticast(mensajeJuego)
             
     def repartirFichasYEnviar(self):
         self.fichasRonda = Fichas(1, [jugador.nombre for jugador in self.jugadores])
@@ -130,11 +138,6 @@ class HiloJuego(threading.Thread):
             jugador.fichas = self.fichasRonda.repartirFichas()
         for jugador in self.jugadores:
             jugador.enviarFicha(self.identificadorProtocolo)
-
-    def getJugadores(self):
-        cad = ""
-        for jugador in self.jugadores:
-            cad += jugador.nombre+","
 
     def jugadorInicial(self):
         player = None
@@ -152,9 +155,9 @@ class HiloJuego(threading.Thread):
                         fichaPrior = ficha['entero_uno'] + ficha['entero_dos']
                         player = jugador
 
-        return jugador
+        return player
 
-    def enviarBroadcast(self, data):
+    def enviarMulticast(self, data):
         print(data)
         self.sockMulticast.sendto(json.dumps(data).encode('utf-8'), self.multicastendpoint)
 

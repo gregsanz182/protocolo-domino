@@ -19,7 +19,7 @@ class MainWindow(QMainWindow):
         self.widgetCentral.setFixedHeight(self.alto)
         self.widgetCentral.setFixedWidth(self.ancho)
         self.widgetCentral.setFrameStyle(QFrame.StyledPanel)
-        self.widgetCentral.setStyleSheet('background-image: url(res/background.png); border-color: #736427; border-width: 10px;')
+        self.widgetCentral.setStyleSheet('background-image: url(res/background.png); border: 4px solid #736427;')
 
 
 

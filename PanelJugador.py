@@ -3,7 +3,7 @@ from Ficha import Ficha
 
 class PanelJugador(QFrame):
 
-    def __init__(self, nombre, numJug, fichas=None, padre=None):
+    def __init__(self, nombre, numJug, padre=None):
         super().__init__(padre)
         self.fichas = []
         self.numJug = numJug
@@ -15,10 +15,9 @@ class PanelJugador(QFrame):
             self.setGeometry(329, 11, 450, 80)
         elif self.numJug == 3:
             self.setGeometry(4, 93, 160, 362)
-        """self.setFrameStyle(QFrame.StyledPanel)
-        self.setStyleSheet('border: 1px solid #FFFFFF;')"""
+        self.setFrameStyle(QFrame.StyledPanel)
+        self.setStyleSheet('border: 1px solid #FFFFFF;')
         self.inicializarManoWidget()
-        self.inicializarFichas(fichas)
 
     def inicializarFichas(self, fichas):
         if fichas:
@@ -44,4 +43,4 @@ class PanelJugador(QFrame):
         elif self.numJug == 2:
             self.manoWidget.setGeometry(25, 9, 255, 57)
         elif self.numJug == 3:
-            self.manoWidget.setGeometry(9, 85, 57, 255)
+            self.manoWidget.setGeometry(14, 85, 57, 255)

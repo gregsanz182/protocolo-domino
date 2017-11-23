@@ -1,6 +1,7 @@
 import sys
 import random
-from PyQt5.QtWidgets import QApplication, QMainWindow, QWidget, QFrame, QStyle
+from PyQt5.QtWidgets import QApplication, QMainWindow, QWidget, QFrame, QStyle, \
+QMessageBox
 from ZonaJuego import ZonaJuego
 from PanelJugador import PanelJugador
 
@@ -9,23 +10,22 @@ class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
         self.setWindowTitle('Dominó (Servidor)')
-        self.ancho = 950
+        self.ancho = 960
         self.alto = 610
 
         self.setFixedWidth(self.ancho)
         self.setFixedHeight(self.alto)
         self.setWidgetCentral()
-        self.zonaJuego = ZonaJuego(self)
+        mes = QMessageBox(self)
+        mes.setText('MEnsaje')
+        mes.exec_()
+        """self.zonaJuego = ZonaJuego(self)
 
         for i in range(0, 28):
             self.zonaJuego.ponerFicha(-1, -1, 0)
         for i in range(0, 28):
-            self.zonaJuego.ponerFicha(random.randint(0, 6), random.randint(0, 6), 1)
+            self.zonaJuego.ponerFicha(random.randint(0, 6), random.randint(0, 6), 1)"""
 
-        PanelJugador('hola', 0, padre=self)
-        PanelJugador('hola', 1, padre=self)
-        PanelJugador('hola', 2, padre=self)
-        PanelJugador('hola', 3, padre=self)
         
     def setWidgetCentral(self):
         self.widgetCentral = QFrame()

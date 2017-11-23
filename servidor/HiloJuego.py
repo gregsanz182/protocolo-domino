@@ -35,6 +35,7 @@ class HiloJuego(threading.Thread):
         self.enviarUDP()
         self.sockTCP.bind(self.TCPendpoint)
         self.sockTCP.listen(4)
+        self.sockTCP.setblocking(True)
         tiempo_comienzo = time.time()
         countdown = False
         while (time.time() - tiempo_comienzo) < 10 and len(self.jugadores) < 4:
@@ -43,7 +44,7 @@ class HiloJuego(threading.Thread):
                 conexion, direccion_cliente = self.sockTCP.accept()
                 print('pasa')
                 if conexion:
-                    conexion.settimeout(5)
+                    conexion.settimeout(2)
                     mensaje = conexion.recv(4096)
                     print('{0} intenta conectarse'.format(direccion_cliente))
                     mensaje_json = json.loads(mensaje.decode('utf-8'))

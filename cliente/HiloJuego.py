@@ -33,12 +33,17 @@ class HiloJuego(threading.Thread):
             if mensaje_json.get('identificador') == self.identificadorProtocolo and 'multicast_ip' in mensaje_json and 'jugador' in mensaje_json:
                 self.miIdentificador = mensaje_json['jugador']
                 self.iniciarMulticast(mensaje_json['multicast_ip'])
-                mensaje, address= self.sockMulticast.recvfrom(4096)
-                mensaje_json = json.loads(mensaje.decode('utf-8'))
-                print('primer mensaje multicast...')
-                print(mensaje_json)
-                #while True:
-                print('envio de TCP exitoso hasta aqui llega cliente')
+
+                while True:
+                    mensaje, address= self.sockMulticast.recvfrom(4096)
+                    mensaje_json = json.loads(mensaje.decode('utf-8'))
+                    print('ensaje entrante')
+                    print(mensaje_json)
+                    if mensaje_json.get('identificador') == self.identificadorProtocolo and 'tipo' in mensaje_json and 'jugadores' in mensaje_json:
+                        mensaje_inicio = mensaje_json
+                    if mensaje_json.get('identificador') == self.identificadorProtocolo and 'tipo' in mensaje_json and 'ronda' in mensaje_json:
+                        mensaje_ronda = mensaje_json
+                        
             else:
                 print('Mensaje incorrecto...')
                 print(mensaje_json)

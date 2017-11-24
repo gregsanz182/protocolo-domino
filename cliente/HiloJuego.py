@@ -30,14 +30,12 @@ class HiloJuego(threading.Thread):
             self.cerrarUDP()
             self.nombre = 'Anny Chacon'
             self.iniciarTCP(mesa-1)
-            #print('Conexion exitosa')
             mensaje_json = {
                 'identificador': self.identificadorProtocolo,
                 'nombre_jugador': self.nombre
             }
             self.enviarTCP(mensaje_json)
             mensaje_json = self.escucharTCP()
-            #print(mensaje_json)
             if mensaje_json.get('identificador') == self.identificadorProtocolo and 'multicast_ip' in mensaje_json and 'jugador' in mensaje_json:
                 self.miIdentificador = mensaje_json['jugador']
                 self.iniciarMulticast(mensaje_json['multicast_ip'])
@@ -45,9 +43,7 @@ class HiloJuego(threading.Thread):
                 self.puntuacion = 0
                 while not terminoPartida:
                     mensaje_json, address = self.escucharMulticast()
-                    #print('***********  Mensaje entrante  ***********')
-                    #print('Se envia desde {}'.format(address))
-                    #print(mensaje_json)
+                    print('=======>', mensaje_json)
                     if mensaje_json.get('identificador') == self.identificadorProtocolo and 'tipo' in mensaje_json:
                         if mensaje_json['tipo'] == 0 and 'jugadores' in mensaje_json:
                             mensaje_inicio = mensaje_json
@@ -55,40 +51,32 @@ class HiloJuego(threading.Thread):
                         elif mensaje_json['tipo'] == 1 and 'ronda' in mensaje_json:
                             mensaje_ronda = mensaje_json
                             self.ronda = mensaje_ronda['ronda']
-                            #print('esperando fichas')
                             mensaje_json = self.escucharTCP()
-                            #print('mensaje TCP')
-                            #print(mensaje_json)
                             if mensaje_json['tipo'] == 2 and 'fichas' in mensaje_json:
                                 mensaje_fichas = mensaje_json
                                 self.guardarFichas(mensaje_fichas['fichas'])
-                                print('fichas')
-                                print(self.fichas)
                             terminoRonda = False
                             while not terminoRonda:
                                 mensaje_json, address = self.escucharMulticast()
-                                print('***********  Mensaje entrante ronda  ***********')
-                                print('Se envia desde {}'.format(address))
-                                print(mensaje_json)
+                                print('pasa multicast')
+                                print('mensaje entrante: {}'.format(mensaje_json))
                                 if mensaje_json.get('identificador') == self.identificadorProtocolo and 'jugador' in mensaje_json and 'tipo' in mensaje_json:
                                     # *********************************  YO  **************************************
                                     if mensaje_json['jugador'] == self.miIdentificador:
+                                        print('juego yo')
                                         if mensaje_json['tipo'] == 3 and 'punta_uno' in mensaje_json and 'punta_dos' in mensaje_json:       
                                             if mensaje_json['punta_uno'] == -1 and mensaje_json['punta_dos'] == -1:
                                                 ficha, punta = self.jugar(-1,-1, None)
                                             elif 'evento_pasado' in mensaje_json:
-                                                print(1)
                                                 evento_pasado = mensaje_json['evento_pasado']
                                                 if 'tipo' in evento_pasado and 'jugador' in evento_pasado and 'punta' in evento_pasado:
-                                                    print(2)
-                                                    if evento_pasado['tipo'] == 0 and 'ficha' in evento_pasado:
-                                                        print(3)
+                                                    if 'ficha' in evento_pasado:
                                                         fichaJugada = evento_pasado['ficha']
                                                         if 'entero_uno' in fichaJugada and 'entero_dos' in fichaJugada:
-                                                            print(4)
+                                                            print('guarda mio')
                                                             self.guardarJugada(fichaJugada['entero_uno'], fichaJugada['entero_dos'],evento_pasado['punta'])
                                                             ficha, punta = self.jugar(mensaje_json['punta_uno'], mensaje_json['punta_dos'], mensaje_json['evento_pasado'])             
-                                            if not ficha:
+                                            if ficha is None:
                                                 mensaje_json = {
                                                     'identificador': self.identificadorProtocolo,
                                                     'ficha': {
@@ -108,6 +96,7 @@ class HiloJuego(threading.Thread):
 
                                             print(mensaje_json)
                                             self.enviarTCP(mensaje_json)
+                                            print('se envia tcp')
                                         elif mensaje_json['tipo'] == 4:
                                             self.ronda = self.ronda + 1
                                             self.puntuacion = self.puntuacion + mensaje_json['puntuacion']
@@ -128,6 +117,7 @@ class HiloJuego(threading.Thread):
                                             terminoPartida = True
                                     # *******************************  OTRO  ***************************************
                                     else:
+                                        print('juega otro')
                                         if mensaje_json['tipo'] == 3 and 'punta_uno' in mensaje_json and 'punta_dos' in mensaje_json:            
                                             if mensaje_json['punta_uno'] != -1 and mensaje_json['punta_dos'] != -1 and 'evento_pasado' in mensaje_json:
                                                 evento_pasado = mensaje_json['evento_pasado']
@@ -135,6 +125,7 @@ class HiloJuego(threading.Thread):
                                                     if evento_pasado['tipo'] == 0 and 'ficha' in evento_pasado:
                                                         fichaJugada = evento_pasado['ficha']
                                                         if 'entero_uno' in fichaJugada and 'entero_dos' in fichaJugada:
+                                                            print('guarda otro')
                                                             self.guardarJugada(fichaJugada['entero_uno'], fichaJugada['entero_dos'],evento_pasado['punta'])
                                         elif mensaje_json['tipo'] == 4:
                                             self.ronda = self.ronda + 1
@@ -206,22 +197,27 @@ class HiloJuego(threading.Thread):
                     sumaMayor = ficha.entero_uno+ficha.entero_dos
                     fi = ficha
             if f:
+                print(f.entero_uno, f.entero_dos)
                 return f, False
             else:
+                print(fi.entero_uno, fi.entero_dos)
                 return fi, False
         else:
             sumaMayor = 0
-            fichas = self.fichas
-            while len(fichas) > 0:
-                for ficha in fichas:
-                    if (ficha.entero_uno+ficha.entero_dos) > sumaMayor:
-                        sumaMayor = ficha.entero_uno+ficha.entero_dos
+            fichaMayor = None
+            punta =  None
+            for ficha in self.fichas:
+                suma = ficha.entero_uno+ficha.entero_dos
+                if suma >= sumaMayor:
+                    if self.tablero[0] in [ficha.entero_dos, ficha.entero_uno]:
                         fichaMayor = ficha
-                if fichaMayor.entero_uno == self.tablero[0] or fichaMayor.entero_dos == self.tablero[0]:
-                    return fichaMayor, True
-                if fichaMayor.entero_uno == self.tablero[len(self.tablero)-1] or fichaMayor.entero_dos == self.tablero[len(self.tablero)-1]:
-                    return fichaMayor, False
-            return None, None
+                        punta = True
+                        sumaMayor = suma
+                    elif self.tablero[len(self.tablero)-1] in [ficha.entero_dos, ficha.entero_uno]:
+                        fichaMayor = ficha
+                        punta = False
+                        sumaMayor = suma
+            return fichaMayor, punta
 
     def guardarJugada(self,entero_uno,entero_dos,punta):
         if len(self.tablero) == 0:
@@ -250,13 +246,18 @@ class HiloJuego(threading.Thread):
             self.jugadores.append(jugador)
 
     def guardarFichas(self,f):
+        self.tablero = []
+        self.fichas = []
+        print('guardando fichas')
         for ficha in f:
+            print(ficha['entero_uno'], ficha['entero_dos'])
             self.fichas.append(Ficha(ficha['entero_uno'], ficha['entero_dos'], ficha['token']))
 
     def iniciarUDP(self):
         UDPendpoint = ('0.0.0.0',3001)
         self.sockUDP = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         self.sockUDP.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)
+        self.sockUDP.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         self.sockUDP.bind(UDPendpoint)
 
     def cerrarUDP(self):
@@ -283,12 +284,9 @@ class HiloJuego(threading.Thread):
         self.sockMulticast.bind(('0.0.0.0', 3001))
         membership = struct.pack("4sl", socket.inet_aton(direccion), socket.INADDR_ANY)
         self.sockMulticast.setsockopt(socket.IPPROTO_IP, socket.IP_ADD_MEMBERSHIP, membership)
-        #print('conexion multicast exitosa')
 
     def escucharMulticast(self):
         mensaje, address= self.sockMulticast.recvfrom(4096)
-        if not self.address_server:
-            self.address_server = address
         return json.loads(mensaje.decode('utf-8')), address
 
     def cerrarMulticast(self):

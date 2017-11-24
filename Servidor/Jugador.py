@@ -12,10 +12,13 @@ class Jugador():
     
     def enviarFicha(self, identificador):
         men = {
-            'identificador': 'DOMINOCOMUNICACIONESI',
+            'identificador': identificador,
+            'tipo': 2,
             'fichas': self.fichas
         }
+        print(men)
         self.socketTCP.sendall(json.dumps(men).encode('utf-8'))
+        return men
         
     def verificarFicha(self, tokenFicha):
         for ficha in self.fichas:

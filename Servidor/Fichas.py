@@ -27,11 +27,11 @@ class Fichas():
         for ficha in self.fichas:
             print(ficha)
 
-    def tomarMano(self):
-        mano = []
+    def repartirFichas(self):
+        fichasJugador = []
         for i in range(7):
-            mano.append(self.randPop())
-        return mano
+            fichasJugador.append(self.randPop())
+        return fichasJugador
 
     def verificarFicha(self, tokenFicha):
         for ficha in self.fichas:

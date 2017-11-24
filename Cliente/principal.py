@@ -110,12 +110,8 @@ class Cliente(threading.Thread):
             port = self.ip_address[1]
             sockUDP = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
             sockUDP.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-
             sockUDP.bind(('0.0.0.0', port))
-            #sockUDP.bind((bind_addr, port))
-            #membership = socket.inet_aton(self.ipMulticast) + socket.inet_aton(bind_addr)
             membership = struct.pack("4sl", socket.inet_aton(self.ipMulticast), socket.INADDR_ANY)
-
             sockUDP.setsockopt(socket.IPPROTO_IP, socket.IP_ADD_MEMBERSHIP, membership)
 
             data = self.sockTCP.recv(4096)

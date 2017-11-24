@@ -8,6 +8,3 @@ if __name__ == '__main__':
     juego = HiloJuego()
     juego.start()
     juego.join()
-
-
-        

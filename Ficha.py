@@ -6,18 +6,18 @@ class Ficha(QLabel):
     horizontal = 0
     vertical = 1
 
-    def __init__(self, puntaA, puntaB, sentido, padre=None):
+    def __init__(self, entero_uno, entero_dos, sentido, padre=None):
         super().__init__(padre)
-        if puntaB > puntaA:
-            self.puntaA = puntaB
-            self.puntaB = puntaA
+        if entero_dos > entero_uno:
+            self.entero_uno = entero_dos
+            self.entero_dos = entero_uno
         else:
-            self.puntaA = puntaA
-            self.puntaB = puntaB
+            self.entero_uno = entero_uno
+            self.entero_dos = entero_dos
         if sentido == self.horizontal:
-            self.pixmap = QPixmap("res/horizontal/{0}_{1}.png".format(self.puntaA, self.puntaB))
+            self.pixmap = QPixmap("res/horizontal/{0}_{1}.png".format(self.entero_uno, self.entero_dos))
         elif sentido == self.vertical:
-            self.pixmap = QPixmap("res/vertical/{0}_{1}.png".format(self.puntaA, self.puntaB))
+            self.pixmap = QPixmap("res/vertical/{0}_{1}.png".format(self.entero_uno, self.entero_dos))
         self.setPixmap(self.pixmap)
         self.setFixedSize(self.pixmap.size())
         self.posicion = 0

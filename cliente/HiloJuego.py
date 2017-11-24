@@ -54,9 +54,11 @@ class HiloJuego(threading.Thread):
                             mensaje_ronda = mensaje_json
                             self.setRonda(mensaje_ronda['ronda'])
                             mensaje_json = self.escucharTCP()
-                        elif 'fichas' in mensaje_json:
-                            mensaje_fichas = mensaje_json
-                            self.guardarFichas(mensaje_fichas['fichas'])
+                            print('mensaje TCP')
+                            print(mensaje_json)
+                            if 'fichas' in mensaje_json:
+                                mensaje_fichas = mensaje_json
+                                self.guardarFichas(mensaje_fichas['fichas'])
                             terminoRonda = False
                             while not terminoRonda:
                                 mensaje_json, address = self.escucharMulticast()
@@ -240,7 +242,7 @@ class HiloJuego(threading.Thread):
         mensaje, address= self.sockMulticast.recvfrom(4096)
         if not self.address_server:
             self.address_server = address
-        return json.loads(mensaje.decode('utf-8'))
+        return json.loads(mensaje.decode('utf-8')), address
 
     def cerrarMulticast(self):
         self.sockMulticast.close()

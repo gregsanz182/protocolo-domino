@@ -1,7 +1,7 @@
 import sys
 import random
 import json
-from PyQt5.QtWidgets import QApplication, QMainWindow, QWidget, QFrame, QStyle
+from PyQt5.QtWidgets import QApplication, QMainWindow, QWidget, QFrame, QStyle, QLabel
 from PyQt5.QtCore import pyqtSignal
 from ZonaJuego import ZonaJuego
 from PanelJugador import PanelJugador
@@ -12,6 +12,7 @@ class MainWindow(QMainWindow):
     inicializarJugadores = pyqtSignal(dict)
     ponerManoJugador = pyqtSignal(dict, str)
     procesarJugada = pyqtSignal(dict)
+    cambiarRonda = pyqtSignal(dict)
 
     def __init__(self):
         super().__init__()
@@ -25,6 +26,11 @@ class MainWindow(QMainWindow):
 
         self.jugadores = {}
         self.zonaJuego = ZonaJuego(self)
+
+        self.labelRonda = QLabel('Ronda #0', self)
+        self.labelRonda.setStyleSheet('font-size: 23px; color: #FFFFFF; font-weight: 500')
+        self.labelRonda.setFixedWidth(200)
+        self.labelRonda.move(16, 14)
 
         self.realizarConexiones()
 
@@ -44,7 +50,8 @@ class MainWindow(QMainWindow):
         self.inicializarJugadores.connect(self.inicializarJugadoresSlot)
         self.ponerManoJugador.connect(self.ponerManoJugadorSlot)
         self.procesarJugada.connect(self.procesarJugadaSlot)
-        
+        self.cambiarRonda.connect(self.cambiarRondaSlot)
+
     def setWidgetCentral(self):
         self.widgetCentral = QFrame()
         self.setCentralWidget(self.widgetCentral)
@@ -81,6 +88,9 @@ class MainWindow(QMainWindow):
                 else:
                     self.zonaJuego.ponerFicha(mensaje_dict['evento_pasado']['entero_dos'], mensaje_dict['evento_pasado']['entero_uno'], mensaje_dict['punta'])
             self.jugadores[mensaje_dict['evento_pasado']['jugador']].quitarFicha(mensaje_dict['evento_pasado']['ficha'])
+
+    def cambiarRondaSlot(self, mensaje_dict):
+        self.labelRonda.setText("Ronda #{}".format(mensaje_dict['ronda']))
             
     
 if __name__ == '__main__':

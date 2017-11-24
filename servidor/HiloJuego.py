@@ -98,6 +98,10 @@ class HiloJuego(threading.Thread):
             }
             time.sleep(1)
             self.enviarMulticast(mensajeJuego)
+
+            #llamada a interfaz gráfica
+            self.mainWindow.cambiarRonda.emit(mensajeJuego)
+            
             time.sleep(1)
             self.repartirFichasYEnviar()
             jugadorTurno = self.jugadorInicial()

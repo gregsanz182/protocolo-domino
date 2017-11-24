@@ -23,3 +23,4 @@ if __name__ == '__main__':
         juego.cerrarTodo()
     except Exception:
         print(sys.exc_info()[1])
+        juego.cerrarTodo()

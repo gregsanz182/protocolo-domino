@@ -6,6 +6,7 @@ import time
 import struct
 import hashlib
 import random
+from Ficha import Ficha
 
 class HiloJuego(threading.Thread):
 
@@ -29,8 +30,6 @@ class HiloJuego(threading.Thread):
             self.cerrarUDP()
             self.nombre = input('ingresa tu nombre de jugador: ')
             self.iniciarTCP(mesa-1)
-            print('se desea conectar a: '.format(self.TCPendpoint))
-            self.sockTCP.connect(self.TCPendpoint)
             print('Conexion exitosa')
             mensaje_json = {
                 'identificador': self.identificadorProtocolo,
@@ -38,6 +37,7 @@ class HiloJuego(threading.Thread):
             }
             self.enviarTCP(mensaje_json)
             mensaje_json = self.escucharTCP()
+            print(mensaje_json)
             if mensaje_json.get('identificador') == self.identificadorProtocolo and 'multicast_ip' in mensaje_json and 'jugador' in mensaje_json:
                 self.miIdentificador = mensaje_json['jugador']
                 self.iniciarMulticast(mensaje_json['multicast_ip'])
@@ -47,7 +47,7 @@ class HiloJuego(threading.Thread):
                     print('***********  Mensaje entrante  ***********')
                     print('Se envia desde {}'.format(address))
                     print(mensaje_json)
-                    if self.address_server == address and mensaje_json.get('identificador') == self.identificadorProtocolo and 'tipo' in mensaje_json:
+                    if mensaje_json.get('identificador') == self.identificadorProtocolo and 'tipo' in mensaje_json:
                         if mensaje_json['tipo'] == 0 and 'jugadores' in mensaje_json:
                             mensaje_inicio = mensaje_json
                             self.guardarJugadores(mensaje_inicio['jugadores'])
@@ -58,7 +58,7 @@ class HiloJuego(threading.Thread):
                             mensaje_json = self.escucharTCP()
                             print('mensaje TCP')
                             print(mensaje_json)
-                            if mensaje_json['tipo'] == 3 and 'fichas' in mensaje_json:
+                            if mensaje_json['tipo'] == 2 and 'fichas' in mensaje_json:
                                 mensaje_fichas = mensaje_json
                                 self.guardarFichas(mensaje_fichas['fichas'])
                             terminoRonda = False
@@ -146,16 +146,17 @@ class HiloJuego(threading.Thread):
                 print('tiempo agotado en espera de mesas...')
                 return -1
 
-    def jugar(self, punta_uno, punta_dos):
+    def jugar(self, punta_uno, punta_dos, evento_pasado):
+        f = fi = None
         if punta_uno == -1:
             mayor = 0
             sumaMayor = 0
             for ficha in self.fichas:
-                if ficha.punta_uno == ficha.punta_dos and ficha.punta_uno > mayor:
-                    mayor = ficha.punta_uno
+                if ficha.entero_uno == ficha.entero_dos and ficha.entero_uno > mayor:
+                    mayor = ficha.entero_uno
                     f = ficha
-                if ficha.punta_uno != ficha.punta_dos and (ficha.punta_uno+ficha.punta_dos) > sumaMayor:
-                    sumaMayor = ficha.punta_uno+ficha.punta_dos
+                if ficha.entero_uno != ficha.entero_dos and (ficha.entero_uno+ficha.entero_dos) > sumaMayor:
+                    sumaMayor = ficha.entero_uno+ficha.entero_dos
                     fi = ficha
             if f:
                 return f, False
@@ -166,12 +167,12 @@ class HiloJuego(threading.Thread):
             fichas = self.fichas
             while len(fichas) > 0:
                 for ficha in fichas:
-                    if (ficha.punta_uno+ficha.punta_dos) > sumaMayor:
-                        sumaMayor = ficha.punta_uno+ficha.punta_dos
+                    if (ficha.entero_uno+ficha.entero_dos) > sumaMayor:
+                        sumaMayor = ficha.entero_uno+ficha.entero_dos
                         fichaMayor = ficha
-                if fichaMayor.punta_uno == self.tablero[0] or fichaMayor.punta_dos == self.tablero[0]:
+                if fichaMayor.entero_uno == self.tablero[0] or fichaMayor.entero_dos == self.tablero[0]:
                     return fichaMayor, True
-                if fichaMayor.punta_uno == self.tablero[len(self.tablero)-1] or fichaMayor.punta_dos == self.tablero[len(self.tablero)-1]:
+                if fichaMayor.entero_uno == self.tablero[len(self.tablero)-1] or fichaMayor.entero_dos == self.tablero[len(self.tablero)-1]:
                     return fichaMayor, False
                 fichas.remove(fichaMayor)
             return None, None
@@ -220,8 +221,8 @@ class HiloJuego(threading.Thread):
 
     def iniciarTCP(self,mesa):
         self.sockTCP = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        print(self.mesas[mesa]['direccion'])
         self.TCPendpoint = (self.mesas[mesa]['direccion'],3001)        
+        self.sockTCP.connect(self.TCPendpoint)
 
     def enviarTCP(self,mensaje):
         self.sockTCP.sendall(json.dumps(mensaje).encode('utf-8'))

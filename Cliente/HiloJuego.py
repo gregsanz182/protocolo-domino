@@ -12,11 +12,8 @@ class HiloJuego(threading.Thread):
 
     def __init__(self, mainWindow, nombre):
         super().__init__()
-<<<<<<< HEAD:Cliente/HiloJuego.py
         self.mainWindow = mainWindow
         self.nombre = nombre
-=======
->>>>>>> origin/protocolo:cliente/HiloJuego.py
         self.identificadorProtocolo = 'DOMINOCOMUNICACIONESI'
         self.miIdentificador = ''
         self.address_server = None
@@ -32,10 +29,6 @@ class HiloJuego(threading.Thread):
         try:
             mesa = self.seleccionarMesa(tiempoInicio)
             self.cerrarUDP()
-<<<<<<< HEAD:Cliente/HiloJuego.py
-=======
-            self.nombre = 'Anny Chacon'
->>>>>>> origin/protocolo:cliente/HiloJuego.py
             self.iniciarTCP(mesa-1)
             #print('Conexion exitosa')
             mensaje_json = {

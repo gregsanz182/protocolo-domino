@@ -75,8 +75,16 @@ class PanelJugador(QFrame):
     def inicializarFichas(self, fichas):
         self.fichas = []
         if fichas:
-           for ficha in fichas:
-               peer = Ficha(ficha['entero_uno'], ficha['entero_dos'], Ficha.vertical if self.numJug in (0, 2) else Ficha.horizontal, self.manoWidget)
+            for ficha in fichas:
+                peer = Ficha(ficha['entero_uno'], ficha['entero_dos'], Ficha.vertical if self.numJug in (0, 2) else Ficha.horizontal, self.manoWidget)
+                if len(self.fichas) == 0:
+                   peer.move(0, 0)
+                elif self.numJug in (0, 2):
+                    peer.move(self.fichas[len(self.fichas) - 1].xFinal() + 11, 0)
+                else:
+                    peer.move(0, self.fichas[len(self.fichas) - 1].yFinal() + 11)
+                self.fichas.append(peer)
+                peer.show()
         else:
             for i in range(0, 7):
                 peer = Ficha(-1, -1, Ficha.vertical if self.numJug in (0, 2) else Ficha.horizontal, self.manoWidget)
@@ -87,6 +95,7 @@ class PanelJugador(QFrame):
                 else:
                     peer.move(0, self.fichas[len(self.fichas) - 1].yFinal() + 11)
                 self.fichas.append(peer)
+                peer.show()
 
     def inicializarManoWidget(self):
         self.manoWidget = QFrame(self)

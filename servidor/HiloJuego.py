@@ -148,7 +148,9 @@ class HiloJuego(threading.Thread):
         for jugador in self.jugadores:
             jugador.fichas = self.fichasRonda.repartirFichas()
         for jugador in self.jugadores:
-            jugador.enviarFicha(self.identificadorProtocolo)
+            men = jugador.enviarFicha(self.identificadorProtocolo)
+            #llamada a interfaz gráfica
+            self.mainWindow.ponerManoJugador.emit(men, jugador.idenJugador)
 
     def jugadorInicial(self):
         player = None

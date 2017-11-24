@@ -273,3 +273,11 @@ class HiloJuego(threading.Thread):
                 suma += player.contarPintas()
         
         return suma
+
+    def cerrarTodo(self):
+        if self.disp.is_alive:
+            self.disp.activo = False
+        try:
+            self.sockTCP.close()
+        except:
+            pass

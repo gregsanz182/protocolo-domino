@@ -6,13 +6,14 @@ import time
 import struct
 import hashlib
 import random
-from Ficha import Ficha
+from Cliente.Ficha import Ficha
 
 class HiloJuego(threading.Thread):
 
-    def __init__(self):
+    def __init__(self, mainWindow, nombre):
         super().__init__()
-        input('dale enter para iniciar')
+        self.mainWindow = mainWindow
+        self.nombre = nombre
         self.identificadorProtocolo = 'DOMINOCOMUNICACIONESI'
         self.miIdentificador = ''
         self.address_server = None
@@ -28,7 +29,6 @@ class HiloJuego(threading.Thread):
         try:
             mesa = self.seleccionarMesa(tiempoInicio)
             self.cerrarUDP()
-            self.nombre = input('ingresa tu nombre de jugador: ')
             self.iniciarTCP(mesa-1)
             print('Conexion exitosa')
             mensaje_json = {
@@ -39,6 +39,8 @@ class HiloJuego(threading.Thread):
             mensaje_json = self.escucharTCP()
             print(mensaje_json)
             if mensaje_json.get('identificador') == self.identificadorProtocolo and 'multicast_ip' in mensaje_json and 'jugador' in mensaje_json:
+                #llamada a la interfaz gráfica
+                self.mainWindow.inicializarJugador.emit(mensaje_json, self.nombre)
                 self.miIdentificador = mensaje_json['jugador']
                 self.iniciarMulticast(mensaje_json['multicast_ip'])
                 terminoPartida = False
@@ -51,6 +53,8 @@ class HiloJuego(threading.Thread):
                         if mensaje_json['tipo'] == 0 and 'jugadores' in mensaje_json:
                             mensaje_inicio = mensaje_json
                             self.guardarJugadores(mensaje_inicio['jugadores'])
+                            #llamada a la interfaz gráfica
+                            self.mainWindow.inicializarJugadores.emit(mensaje_inicio)
                         elif mensaje_json['tipo'] == 1 and 'ronda' in mensaje_json:
                             mensaje_ronda = mensaje_json
                             self.setRonda(mensaje_ronda['ronda'])
@@ -250,3 +254,17 @@ class HiloJuego(threading.Thread):
 
     def cerrarMulticast(self):
         self.sockMulticast.close()
+
+    def cerrarTodo(self):
+        try:
+            self.sockUDP.close()
+        except:
+            pass
+        try:
+            self.sockTCP.close()
+        except:
+            pass
+        try:
+            self.sockMulticast.close()
+        except:
+            pass

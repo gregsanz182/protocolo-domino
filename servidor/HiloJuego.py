@@ -44,7 +44,7 @@ class HiloJuego(threading.Thread):
                 conexion, direccion_cliente = self.sockTCP.accept()
                 print('pasa')
                 if conexion:
-                    self.sockTCP.settimeout(3)
+                    self.sockTCP.settimeout(5)
                     mensaje = conexion.recv(4096)
                     print('{0} intenta conectarse'.format(direccion_cliente))
                     mensaje_json = json.loads(mensaje.decode('utf-8'))

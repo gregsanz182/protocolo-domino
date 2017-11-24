@@ -29,6 +29,7 @@ class HiloJuego(threading.Thread):
             self.cerrarUDP()
             self.nombre = input('ingresa tu nombre de jugador: ')
             self.iniciarTCP(mesa-1)
+            print('se desea conectar a: '.format(self.TCPendpoint))
             self.sockTCP.connect(self.TCPendpoint)
             print('Conexion exitosa')
             mensaje_json = {
@@ -47,16 +48,17 @@ class HiloJuego(threading.Thread):
                     print('Se envia desde {}'.format(address))
                     print(mensaje_json)
                     if self.address_server == address and mensaje_json.get('identificador') == self.identificadorProtocolo and 'tipo' in mensaje_json:
-                        if 'jugadores' in mensaje_json:
+                        if mensaje_json['tipo'] == 0 and 'jugadores' in mensaje_json:
                             mensaje_inicio = mensaje_json
                             self.guardarJugadores(mensaje_inicio['jugadores'])
-                        elif 'ronda' in mensaje_json:
+                        elif mensaje_json['tipo'] == 1 and 'ronda' in mensaje_json:
                             mensaje_ronda = mensaje_json
                             self.setRonda(mensaje_ronda['ronda'])
+                            print('esperando fichas')
                             mensaje_json = self.escucharTCP()
                             print('mensaje TCP')
                             print(mensaje_json)
-                            if 'fichas' in mensaje_json:
+                            if mensaje_json['tipo'] == 3 and 'fichas' in mensaje_json:
                                 mensaje_fichas = mensaje_json
                                 self.guardarFichas(mensaje_fichas['fichas'])
                             terminoRonda = False
@@ -218,6 +220,7 @@ class HiloJuego(threading.Thread):
 
     def iniciarTCP(self,mesa):
         self.sockTCP = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        print(self.mesas[mesa]['direccion'])
         self.TCPendpoint = (self.mesas[mesa]['direccion'],3001)        
 
     def enviarTCP(self,mensaje):

@@ -16,6 +16,7 @@ class Jugador():
             'tipo': 2,
             'fichas': self.fichas
         }
+        print(men)
         self.socketTCP.sendall(json.dumps(men).encode('utf-8'))
         
     def verificarFicha(self, tokenFicha):

@@ -16,6 +16,7 @@ class HiloJuego(threading.Thread):
         super().__init__()
         self.mainWindow = mainWindow
         self.identificadorProtocolo = 'DOMINOCOMUNICACIONESI'
+        self.contadorPuntos = 0
         self.TCPendpoint = ('0.0.0.0', 3001)
         self.sockTCP = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.multicastendpoint = ('225.145.80.15', 3001)
@@ -87,23 +88,23 @@ class HiloJuego(threading.Thread):
         }
         for jugador in self.jugadores:
             mensajeJuego['jugadores'].append({'identificador':jugador.idenJugador,'nombre':jugador.nombre})
-        time.sleep(1)
         self.enviarMulticast(mensajeJuego)
-        while True:
+        time.sleep(1)
+        while self.contadorPuntos < 100:
             print("Iniciando Ronda #{}".format(self.ronda))
             mensajeJuego = {
                 'identificador': self.identificadorProtocolo,
                 'tipo': 1,
                 'ronda': self.ronda
             }
-            time.sleep(1)
             self.enviarMulticast(mensajeJuego)
 
             #llamada a interfaz gráfica
             self.mainWindow.cambiarRonda.emit(mensajeJuego)
             
-            time.sleep(1)
+            time.sleep(2)
             self.repartirFichasYEnviar()
+            time.sleep(2)
             jugadorTurno = self.jugadorInicial()
             mensajeJuego = {
                 'identificador': self.identificadorProtocolo,
@@ -116,7 +117,7 @@ class HiloJuego(threading.Thread):
             jugando = True
             self.enviarMulticast(mensajeJuego)
             self.mainWindow.procesarJugada.emit(mensajeJuego)
-            time.sleep(1)
+            time.sleep(2)
             while jugando:
                 evento_pasado = self.esperarYrealizarJugada(jugadorTurno, tableroCola)
                 time.sleep(2)
@@ -125,10 +126,11 @@ class HiloJuego(threading.Thread):
                     mensajeJuego = {
                         'identificador': self.identificadorProtocolo,
                         'jugador': jugadorGanador.idenJugador,
-                        'tipo': 1,
+                        'tipo': 4,
                         'puntuacion': self.calcularPuntuacion(jugadorGanador),
                         'razon': razon
                     }
+                    contadorPuntos += self.calcularPuntuacion(jugadorGanador)
                     jugando = False
                 else:
                     jugadorTurno = self.jugadores[(self.jugadores.index(jugadorTurno)+1)%len(self.jugadores)]
@@ -148,6 +150,13 @@ class HiloJuego(threading.Thread):
                 if mensajeJuego['tipo'] == 1:
                     print(mensajeJuego)
                 self.enviarMulticast(mensajeJuego)
+        mensajeJuego = {
+            'identificador': self.identificadorProtocolo,
+            'jugador': jugadorGanador.idenJugador,
+            'tipo': 4,
+            'puntuacion': self.calcularPuntuacion(jugadorGanador),
+            'razon': razon
+        }
             
     def repartirFichasYEnviar(self):
         self.fichasRonda = Fichas(1, [jugador.nombre for jugador in self.jugadores])

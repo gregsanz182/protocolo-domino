@@ -17,6 +17,7 @@ class HiloJuego(threading.Thread):
         self.identificadorProtocolo = 'DOMINOCOMUNICACIONESI'
         self.miIdentificador = ''
         self.address_server = None
+        self.puntuacion = 0
         self.ronda = 0
         self.mesas = []
         self.fichas = []
@@ -44,6 +45,7 @@ class HiloJuego(threading.Thread):
                 self.miIdentificador = mensaje_json['jugador']
                 self.iniciarMulticast(mensaje_json['multicast_ip'])
                 terminoPartida = False
+                self.puntuacion = 0
                 while not terminoPartida:
                     mensaje_json, address = self.escucharMulticast()
                     #print('***********  Mensaje entrante  ***********')
@@ -57,7 +59,7 @@ class HiloJuego(threading.Thread):
                             self.mainWindow.inicializarJugadores.emit(mensaje_inicio)
                         elif mensaje_json['tipo'] == 1 and 'ronda' in mensaje_json:
                             mensaje_ronda = mensaje_json
-                            self.setRonda(mensaje_ronda['ronda'])
+                            self.ronda = mensaje_ronda['ronda']
                             #print('esperando fichas')
                             mensaje_json = self.escucharTCP()
                             #print('mensaje TCP')
@@ -107,17 +109,28 @@ class HiloJuego(threading.Thread):
                                                     },
                                                     'punta': punta
                                                 }
-                                                #self.fichas.pop(self.getIndex(ficha))
                                                 self.fichas.remove(ficha)
 
                                             print(mensaje_json)
                                             self.enviarTCP(mensaje_json)
                                         elif mensaje_json['tipo'] == 4:
+                                            self.ronda = self.ronda + 1
+                                            self.puntuacion = self.puntuacion + mensaje_json['puntuacion']
+                                            print('...Ronda Finalizada...')
+                                            print('YUPIIIIIIIIIIIII GANE LA RONDA')
+                                            print('Puntuacion: {!r}'.format(mensaje_json['puntuacion']))
+                                            print('Razón: {!r}'.format(mensaje_json['razon']))
+                                            print('Siguiente ronda: {!r}'.format(self.ronda))
                                             terminoRonda = True
                                         elif mensaje_json['tipo'] == 5:
+                                            print('...Fin de la partida...')
+                                            print('YUPIIIIIIIIIIIII GANE LA PARTIDA')
+                                            print('Puntuacion: {!r}'.format(mensaje_json['puntuacion']))
+                                            print('Puntuación general')
+                                            for j in mensaje['puntuacion_general']:
+                                                print('Jugador: {!r} puntuación: {!r}'.format(j['jugador'], j['puntuacion']))
+                                            print('Razón: {!r}'.format(mensaje_json['razon']))
                                             terminoPartida = True
-                                        elif mensaje_json['tipo'] == 6:
-                                            pass
                                     # *******************************  OTRO  ***************************************
                                     else:
                                         if mensaje_json['tipo'] == 3 and 'punta_uno' in mensaje_json and 'punta_dos' in mensaje_json:            
@@ -129,11 +142,27 @@ class HiloJuego(threading.Thread):
                                                         if 'entero_uno' in fichaJugada and 'entero_dos' in fichaJugada:
                                                             self.guardarJugada(fichaJugada['entero_uno'], fichaJugada['entero_dos'],evento_pasado['punta'])
                                         elif mensaje_json['tipo'] == 4:
+                                            self.ronda = self.ronda + 1
+                                            print('...Ronda Finalizada...')
+                                            print('No ganaste, tal vez la próxima')
+                                            print('Ganador: {!r}'.format(mensaje_json['jugador']))
+                                            print('Puntuacion: {!r}'.format(mensaje_json['puntuacion']))
+                                            print('Razón: {!r}'.format(mensaje_json['razon']))
+                                            print('Siguiente ronda: {!r}'.format(self.ronda))
+                                            for jugador in self.jugadores:
+                                                if jugador['identificador'] == mensaje_json['jugador']:
+                                                    jugador['puntuacion'] = mensaje_json['puntuacion']
                                             terminoRonda = True
                                         elif mensaje_json['tipo'] == 5:
+                                            print('...Fin de la partida...')
+                                            print('Ganador{!r}'.format(mensaje_json['jugador']))
+                                            print('Puntuación general')
+                                            for j in mensaje['puntuacion_general']:
+                                                print('Jugador: {!r} puntuación: {!r}'.format(j['jugador'], j['puntuacion']))
+                                            print('Razón: {!r}'.format(mensaje['razon']))
                                             terminoPartida = True
                                         elif mensaje_json['tipo'] == 6:
-                                            pass
+                                            print('Jugador se desconecto: {!r}'.format(mensaje_json['jugador']))
 
                         
             else:
@@ -228,9 +257,6 @@ class HiloJuego(threading.Thread):
     def guardarFichas(self,f):
         for ficha in f:
             self.fichas.append(Ficha(ficha['entero_uno'], ficha['entero_dos'], ficha['token']))
-
-    def setRonda(self,ronda):
-        self.ronda = ronda
 
     def iniciarUDP(self):
         UDPendpoint = ('0.0.0.0',3001)

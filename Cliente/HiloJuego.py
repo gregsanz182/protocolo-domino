@@ -259,7 +259,7 @@ class HiloJuego(threading.Thread):
             self.fichas.append(Ficha(ficha['entero_uno'], ficha['entero_dos'], ficha['token']))
 
     def iniciarUDP(self):
-        UDPendpoint = ('0.0.0.0',3001)
+        UDPendpoint = ('0.0.0.0', 3001)
         self.sockUDP = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         self.sockUDP.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)
         self.sockUDP.bind(UDPendpoint)

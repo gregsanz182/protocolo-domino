@@ -16,9 +16,9 @@ class HiloJuego(threading.Thread):
         super().__init__()
         self.mainWindow = mainWindow
         self.identificadorProtocolo = 'DOMINOCOMUNICACIONESI'
-        self.contadorPuntos = 0
         self.TCPendpoint = ('0.0.0.0', 3001)
         self.sockTCP = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        self.sockTCP.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         self.multicastendpoint = ('225.145.80.15', 3001)
         self.sockMulticast = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         self.sockMulticast.setsockopt(socket.IPPROTO_IP, socket.IP_MULTICAST_TTL, struct.pack('b', 1))
@@ -62,7 +62,7 @@ class HiloJuego(threading.Thread):
                         self.mainWindow.inicializarJugador.emit(respJson, mensaje_json['nombre_jugador'])
 
                         tiempo_comienzo = time.time()
-                        if len(self.jugadores) == 2:
+                        if len(self.jugadores) == 1:
                             countdown = True
             except (socket.timeout, ValueError):
                 pass
@@ -90,7 +90,8 @@ class HiloJuego(threading.Thread):
             mensajeJuego['jugadores'].append({'identificador':jugador.idenJugador,'nombre':jugador.nombre})
         self.enviarMulticast(mensajeJuego)
         time.sleep(1)
-        while self.contadorPuntos < 100:
+        contadorPuntos = 0
+        while contadorPuntos < 100:
             print("Iniciando Ronda #{}".format(self.ronda))
             mensajeJuego = {
                 'identificador': self.identificadorProtocolo,
@@ -172,11 +173,11 @@ class HiloJuego(threading.Thread):
         fichaPrior = -1
         for jugador in self.jugadores:
             for ficha in jugador.fichas:
-                if ficha['entero_uno'] == ficha['entero_dos'] and ficha['entero_uno'] > fichaPrior:
+                if ficha['entero_uno'] == ficha['entero_dos'] and (ficha['entero_uno'] + ficha['entero_dos']) > fichaPrior:
                     fichaPrior = ficha['entero_uno']
                     player = jugador
         
-        if jugador is None:
+        if player is None:
             for jugador in self.jugadores:
                 for ficha in jugador.fichas:
                     if (ficha['entero_uno'] + ficha['entero_dos']) > fichaPrior:

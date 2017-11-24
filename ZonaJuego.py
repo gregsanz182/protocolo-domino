@@ -49,6 +49,7 @@ class ZonaJuego(QFrame):
                 ficha.move(self.fichas[len(self.fichas)-1].xFinal(), self.fichas[len(self.fichas)-1].yCentral()-(ficha.height() / 2))
             ficha.posicion = self.fichas[len(self.fichas)-1].posicion + 1
             self.fichas.append(ficha)
+        ficha.show()
 
     def limpiarZonaJuego(self):
         for ficha in self.fichas:

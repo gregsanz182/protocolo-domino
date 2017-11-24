@@ -15,7 +15,10 @@ class Ficha(QLabel):
             self.entero_uno = entero_uno
             self.entero_dos = entero_dos
         if sentido == self.horizontal:
-            self.pixmap = QPixmap("res/horizontal/{0}_{1}.png".format(self.entero_uno, self.entero_dos))
+            if entero_dos > entero_uno:
+                self.pixmap = QPixmap("res/horizontal/{0}_{1}.png".format(self.entero_uno, self.entero_dos))
+            else:
+                self.pixmap = QPixmap("res/horizontal/{0}_{1}.png".format(self.entero_uno, self.entero_dos)).transformed(QTransform().scale(-1, 1))
         elif sentido == self.vertical:
             self.pixmap = QPixmap("res/vertical/{0}_{1}.png".format(self.entero_uno, self.entero_dos))
         self.setPixmap(self.pixmap)

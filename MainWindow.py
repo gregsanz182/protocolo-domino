@@ -78,27 +78,27 @@ class MainWindow(QMainWindow):
     def procesarJugadaSlot(self, mensaje_dict):
         if 'evento_pasado' in mensaje_dict:
             if mensaje_dict['evento_pasado']['tipo'] == 0:
-                if mensaje_dict['punta']:
-                    if mensaje_dict['punta_uno'] == mensaje_dict['evento_pasado']['entero_uno']:
-                        self.zonaJuego.ponerFicha(mensaje_dict['evento_pasado']['entero_dos'], mensaje_dict['evento_pasado']['entero_uno'], mensaje_dict['punta'])
+                if mensaje_dict['evento_pasado']['punta']:
+                    if mensaje_dict['punta_uno'] == mensaje_dict['evento_pasado']['ficha']['entero_uno']:
+                        self.zonaJuego.ponerFicha(mensaje_dict['evento_pasado']['ficha']['entero_dos'], mensaje_dict['evento_pasado']['ficha']['entero_uno'], mensaje_dict['evento_pasado']['punta'])
                     else:
-                        self.zonaJuego.ponerFicha(mensaje_dict['evento_pasado']['entero_uno'], mensaje_dict['evento_pasado']['entero_dos'], mensaje_dict['punta'])
+                        self.zonaJuego.ponerFicha(mensaje_dict['evento_pasado']['ficha']['entero_uno'], mensaje_dict['evento_pasado']['ficha']['entero_dos'], mensaje_dict['evento_pasado']['punta'])
                 else:
-                    if mensaje_dict['punta_dos'] == mensaje_dict['evento_pasado']['entero_uno']:
-                        self.zonaJuego.ponerFicha(mensaje_dict['evento_pasado']['entero_uno'], mensaje_dict['evento_pasado']['entero_dos'], mensaje_dict['punta'])
+                    if mensaje_dict['punta_dos'] == mensaje_dict['evento_pasado']['ficha']['entero_uno']:
+                        self.zonaJuego.ponerFicha(mensaje_dict['evento_pasado']['ficha']['entero_uno'], mensaje_dict['evento_pasado']['ficha']['entero_dos'], mensaje_dict['evento_pasado']['punta'])
                     else:
-                        self.zonaJuego.ponerFicha(mensaje_dict['evento_pasado']['entero_dos'], mensaje_dict['evento_pasado']['entero_uno'], mensaje_dict['punta'])
+                        self.zonaJuego.ponerFicha(mensaje_dict['evento_pasado']['ficha']['entero_dos'], mensaje_dict['evento_pasado']['ficha']['entero_uno'], mensaje_dict['evento_pasado']['punta'])
                 self.jugadores[mensaje_dict['evento_pasado']['jugador']].quitarFicha(mensaje_dict['evento_pasado']['ficha'])
-            self.jugadores[mensaje_dict['evento_pasado'['jugador']]].cambiarEstado(mensaje_dict['evento_pasado']['tipo'])
+            self.jugadores[mensaje_dict['evento_pasado']['jugador']].cambiarEstado(mensaje_dict['evento_pasado']['tipo'])
         self.jugadores[mensaje_dict['jugador']].cambiarEstado(3)
-        if mensaje_dict['tipo'] == 3:
+        if mensaje_dict['tipo'] == 4:
             self.jugadores[mensaje_dict['jugador']].cambiarPuntuacion(mensaje_dict['puntuacion'])
 
 
     def cambiarRondaSlot(self, mensaje_dict):
         self.labelRonda.setText("Ronda #{}".format(mensaje_dict['ronda']))
-        for jugador in self.jugadores:
-            jugador.borrarFichas()
+        for key in self.jugadores.keys():
+            self.jugadores[key].borrarFichas()
         self.zonaJuego.limpiarZonaJuego()
     
 if __name__ == '__main__':

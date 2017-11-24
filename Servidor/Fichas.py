@@ -4,10 +4,9 @@ import random
 
 class Fichas():
 
-    fichas = list()
-
     def __init__(self, ronda, nombres):
         cad = "".join(nombres)+str(ronda)
+        self.fichas = []
         for i in range(0, 7):
             for j in range(i, 7):
                 tok = cad+str(i)+str(j)+str(random.randrange(0, 2500))

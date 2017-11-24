@@ -61,7 +61,7 @@ class HiloJuego(threading.Thread):
                         self.mainWindow.inicializarJugador.emit(respJson, mensaje_json['nombre_jugador'])
 
                         tiempo_comienzo = time.time()
-                        if len(self.jugadores) == 1:
+                        if len(self.jugadores) == 2:
                             countdown = True
             except (socket.timeout, ValueError):
                 pass
@@ -115,6 +115,7 @@ class HiloJuego(threading.Thread):
             tableroCola = []
             jugando = True
             self.enviarMulticast(mensajeJuego)
+            self.mainWindow.procesarJugada.emit(mensajeJuego)
             time.sleep(1)
             while jugando:
                 evento_pasado = self.esperarYrealizarJugada(jugadorTurno, tableroCola)
@@ -139,6 +140,7 @@ class HiloJuego(threading.Thread):
                         'punta_dos': tableroCola[len(tableroCola)-1],
                         'evento_pasado': evento_pasado
                     }
+                    self.mainWindow.procesarJugada.emit(mensajeJuego)
                 print('|', end='')
                 for i, ficha in enumerate(tableroCola):
                     print('{0}{1}'.format(ficha, ':' if (i%2)==0 else '|'), end='')

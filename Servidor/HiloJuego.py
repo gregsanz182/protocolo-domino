@@ -142,13 +142,13 @@ class HiloJuego(threading.Thread):
                         'punta_dos': tableroCola[len(tableroCola)-1],
                         'evento_pasado': evento_pasado
                     }
-                    self.mainWindow.procesarJugada.emit(mensajeJuego)
                 print('|', end='')
                 for i, ficha in enumerate(tableroCola):
                     print('{0}{1}'.format(ficha, ':' if (i%2)==0 else '|'), end='')
                 print('')
                 if mensajeJuego['tipo'] == 1:
                     print(mensajeJuego)
+                self.mainWindow.procesarJugada.emit(mensajeJuego)
                 self.enviarMulticast(mensajeJuego)
         mensajeJuego = {
             'identificador': self.identificadorProtocolo,

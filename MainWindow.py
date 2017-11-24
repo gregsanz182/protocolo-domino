@@ -91,10 +91,15 @@ class MainWindow(QMainWindow):
                 self.jugadores[mensaje_dict['evento_pasado']['jugador']].quitarFicha(mensaje_dict['evento_pasado']['ficha'])
             self.jugadores[mensaje_dict['evento_pasado'['jugador']]].cambiarEstado(mensaje_dict['evento_pasado']['tipo'])
         self.jugadores[mensaje_dict['jugador']].cambiarEstado(3)
+        if mensaje_dict['tipo'] == 3:
+            self.jugadores[mensaje_dict['jugador']].cambiarPuntuacion(mensaje_dict['puntuacion'])
+
 
     def cambiarRondaSlot(self, mensaje_dict):
         self.labelRonda.setText("Ronda #{}".format(mensaje_dict['ronda']))
-            
+        for jugador in self.jugadores:
+            jugador.borrarFichas()
+        self.zonaJuego.limpiarZonaJuego()
     
 if __name__ == '__main__':
     try:

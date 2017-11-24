@@ -104,6 +104,11 @@ class PanelJugador(QFrame):
                 self.fichas.append(peer)
                 peer.show()
 
+    def borrarFichas(self):
+        for ficha in self.fichas:
+            ficha.hide()
+            ficha.deleteLater()
+
     def inicializarManoWidget(self):
         self.manoWidget = QFrame(self)
         if self.numJug == 0:
@@ -136,3 +141,6 @@ class PanelJugador(QFrame):
     def cambiarEstado(self, estado):
         self.estadoLabel.setText(self.estados[estado]['texto'])
         self.estadoLabel.setStyleSheet(self.estados[estado]['style'])
+
+    def cambiarPuntuacion(self, puntuacion):
+        self.puntosLabel.setText(puntuacion+" puntos")

@@ -142,10 +142,13 @@ class HiloJuego(threading.Thread):
         mensajeJuego = {
             'identificador': self.identificadorProtocolo,
             'jugador': jugadorGanador.idenJugador,
-            'tipo': 4,
-            'puntuacion': self.calcularPuntuacion(jugadorGanador),
+            'tipo': 5,
             'razon': razon
         }
+        puntuacion_general = []
+        for jugador in jugadores:
+            puntuacion_general.append({['jugador': jugador['idenJugador'], 'puntuacion': self.calcularPuntuacion(jugador)})
+
             
     def repartirFichasYEnviar(self):
         self.fichasRonda = Fichas(1, [jugador.nombre for jugador in self.jugadores])

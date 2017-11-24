@@ -5,6 +5,13 @@ from Ficha import Ficha
 
 class PanelJugador(QFrame):
 
+    estados = [
+        {"texto": "Jugó", "style": 'font-size: 19px; color: #00FF40;'},
+        {"texto": "Erroneo", "style": 'font-size: 19px; color: #FF2626;'},
+        {"texto": "Pasó", "style": 'font-size: 19px; color: #FF2626;'},
+        {"texto": "Turno", "style": 'font-size: 19px; color: #F3D352;'} 
+    ]
+
     def __init__(self, nombre, numJug, padre=None):
         super().__init__(padre)
         self.fichas = []
@@ -14,8 +21,8 @@ class PanelJugador(QFrame):
         self.nombreLabel.setStyleSheet('font-size: 13px; color: #FFFFFF; font-weight: 500; font-style: italic;')
         self.puntosLabel = QLabel("0 puntos", self) 
         self.puntosLabel.setStyleSheet('font-size: 12px; color: #FFFFFF;')
-        self.estadoLabel = QLabel('Jugó', self)
-        self.estadoLabel.setStyleSheet('font-size: 19px; color: #00FF40;')
+        self.estadoLabel = QLabel('Esperando', self)
+        self.estadoLabel.setStyleSheet('font-size: 19px; color: #007FFF;')
         if self.numJug == 0:
             self.setGeometry(181, 519, 450, 80)
             self.nombreLabel.setAlignment(Qt.AlignRight)
@@ -126,4 +133,6 @@ class PanelJugador(QFrame):
             f.deleteLater()
             self.fichas.remove(f)
 
-
+    def cambiarEstado(self, estado):
+        self.estadoLabel.setText(self.estados[estado]['texto'])
+        self.estadoLabel.setStyleSheet(self.estados[estado]['style'])

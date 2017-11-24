@@ -5,7 +5,7 @@ from Ficha import Ficha
 
 class PanelJugador(QFrame):
 
-    def __init__(self, nombre, numJug, fichas=None, padre=None):
+    def __init__(self, nombre, numJug, padre=None):
         super().__init__(padre)
         self.fichas = []
         self.numJug = numJug

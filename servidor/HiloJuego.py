@@ -6,14 +6,15 @@ import time
 import struct
 import hashlib
 import random
-from Jugador import Jugador
-from HiloDisponibilidad import HiloDisponibilidad
-from Fichas import Fichas
+from Servidor.Jugador import Jugador
+from Servidor.HiloDisponibilidad import HiloDisponibilidad
+from Servidor.Fichas import Fichas
 
 class HiloJuego(threading.Thread):
 
-    def __init__(self):
+    def __init__(self, mainWindow):
         super().__init__()
+        self.mainWindow = mainWindow
         self.identificadorProtocolo = 'DOMINOCOMUNICACIONESI'
         self.TCPendpoint = ('0.0.0.0', 3001)
         self.sockTCP = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -55,6 +56,10 @@ class HiloJuego(threading.Thread):
                         conexion.sendall(json.dumps(self.jsonMulticast).encode('utf-8'))
                         print("El jugador {0} se ha conectado bajo la direccion {1}".format(mensaje_json['nombre_jugador'], direccion_cliente))
                         self.jugadores.append(Jugador(mensaje_json['nombre_jugador'], idenJugador, direccion_cliente, conexion))
+
+                        #llamada a interfaz gráfica
+                        self.mainWindow.inicializarJugador.emit(respJson, mensaje_json['nombre_jugador'])
+
                         tiempo_comienzo = time.time()
                         if len(self.jugadores) == 1:
                             countdown = True

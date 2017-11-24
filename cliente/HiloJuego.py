@@ -49,11 +49,11 @@ class HiloJuego(threading.Thread):
                         if 'jugadores' in mensaje_json:
                             mensaje_inicio = mensaje_json
                             self.guardarJugadores(mensaje_inicio['jugadores'])
-                        else if 'ronda' in mensaje_json:
+                        elif 'ronda' in mensaje_json:
                             mensaje_ronda = mensaje_json
                             self.setRonda(mensaje_ronda['ronda'])
                             mensaje_json = self.escucharTCP()
-                        else if 'fichas' in mensaje_json:
+                        elif 'fichas' in mensaje_json:
                             mensaje_fichas = mensaje_json
                             self.guardarFichas(mensaje_fichas['fichas'])
                             terminoRonda = False
@@ -66,15 +66,14 @@ class HiloJuego(threading.Thread):
                                     if mensaje_json['jugador'] == self.miIdentificador and mensaje_json['tipo'] == 3 and 'punta_uno' in mensaje_json and 'punta_dos' in mensaje_json:
                                         if mensaje_json['punta_uno'] == -1 and mensaje_json['punta_dos'] == -1:
                                             self.jugar(-1,-1, None)
-                                        else if 'evento_pasado' in mensaje_json:
+                                        elif 'evento_pasado' in mensaje_json:
                                             self.jugar(mensaje_json['punta_uno'], mensaje_json['punta_dos'], mensaje_json['evento_pasado'])
-                                    else if mensaje_json['tipo'] == 4:
+                                    elif mensaje_json['tipo'] == 4:
                                         terminoRonda = True
-                                    else if mensaje_json['tipo'] == 5:
+                                    elif mensaje_json['tipo'] == 5:
                                         terminoPartida = True
-                                    else if mensaje_json['tipo'] == 6:
-
-                        
+                                    elif mensaje_json['tipo'] == 6:
+                                        pass      
             else:
                 print('Mensaje incorrecto...')
                 print(mensaje_json)
@@ -161,7 +160,7 @@ class HiloJuego(threading.Thread):
         self.sockMulticast.setsockopt(socket.IPPROTO_IP, socket.IP_ADD_MEMBERSHIP, membership)
         print('conexion multicast exitosa')
 
-    def escucharMulticast():
+    def escucharMulticast(self):
         mensaje, address= self.sockMulticast.recvfrom(4096)
         if not self.address_server:
             self.address_server = address

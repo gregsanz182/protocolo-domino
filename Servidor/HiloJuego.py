@@ -134,7 +134,7 @@ class HiloJuego(threading.Thread):
                     mensajeJuego = {
                         'identificador': self.identificadorProtocolo,
                         'jugador': jugadorTurno.idenJugador,
-                        'tipo': 0,
+                        'tipo': 3,
                         'punta_uno': tableroCola[0],
                         'punta_dos': tableroCola[len(tableroCola)-1],
                         'evento_pasado': evento_pasado
@@ -194,9 +194,9 @@ class HiloJuego(threading.Thread):
                     'jugador': jugador.idenJugador,
                     'ficha': {
                         'entero_uno': ficha['entero_uno'],
-                        'entero_dos': ficha['entero_dos'],
-                        'punta': menJson['punta']
-                    }
+                        'entero_dos': ficha['entero_dos']
+                    },
+                    'punta': menJson['punta']
                 }
                 if self.realizarJugada(tableroCola, ficha, menJson['punta']):
                     jugador.fichas.remove(ficha)

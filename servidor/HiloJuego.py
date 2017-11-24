@@ -45,7 +45,7 @@ class HiloJuego(threading.Thread):
                 conexion, direccion_cliente = self.sockTCP.accept()
                 print('pasa')
                 if conexion:
-                    self.sockTCP.settimeout(5)
+                    self.sockTCP.settimeout(3)
                     mensaje = conexion.recv(4096)
                     print('{0} intenta conectarse'.format(direccion_cliente))
                     mensaje_json = json.loads(mensaje.decode('utf-8'))
@@ -87,6 +87,7 @@ class HiloJuego(threading.Thread):
         }
         for jugador in self.jugadores:
             mensajeJuego['jugadores'].append({'identificador':jugador.idenJugador,'nombre':jugador.nombre})
+        time.sleep(1)
         self.enviarMulticast(mensajeJuego)
         while True:
             print("Iniciando Ronda #{}".format(self.ronda))
@@ -95,7 +96,9 @@ class HiloJuego(threading.Thread):
                 'tipo': 1,
                 'ronda': self.ronda
             }
+            time.sleep(1)
             self.enviarMulticast(mensajeJuego)
+            time.sleep(1)
             self.repartirFichasYEnviar()
             jugadorTurno = self.jugadorInicial()
             mensajeJuego = {
@@ -108,6 +111,7 @@ class HiloJuego(threading.Thread):
             tableroCola = []
             jugando = True
             self.enviarMulticast(mensajeJuego)
+            time.sleep(1)
             while jugando:
                 evento_pasado = self.esperarYrealizarJugada(jugadorTurno, tableroCola)
                 time.sleep(2)

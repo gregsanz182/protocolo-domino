@@ -40,7 +40,7 @@ class HiloJuego(threading.Thread):
         self.sockTCP.setblocking(1)
         tiempo_comienzo = time.time()
         countdown = False
-        while (time.time() - tiempo_comienzo) < 10 and len(self.jugadores) < 4:
+        while (time.time() - tiempo_comienzo) < 15 and len(self.jugadores) < 4:
             try:
                 print('esperando conexiones de los clientes')
                 conexion, direccion_cliente = self.sockTCP.accept()
@@ -62,7 +62,7 @@ class HiloJuego(threading.Thread):
                         self.mainWindow.inicializarJugador.emit(respJson, mensaje_json['nombre_jugador'])
 
                         tiempo_comienzo = time.time()
-                        if len(self.jugadores) == 1:
+                        if len(self.jugadores) == 2:
                             countdown = True
             except (socket.timeout, ValueError):
                 pass
@@ -159,7 +159,7 @@ class HiloJuego(threading.Thread):
         }
         puntuacion_general = []
         for jugador in jugadores:
-            puntuacion_general.append({['jugador': jugador['idenJugador'], 'puntuacion': self.calcularPuntuacion(jugador)})
+            puntuacion_general.append({'jugador': jugador['idenJugador'], 'puntuacion': self.calcularPuntuacion(jugador)})
 
             
     def repartirFichasYEnviar(self):

@@ -7,7 +7,7 @@ if __name__ == '__main__':
     try:
         mainApp = QApplication(sys.argv)
 
-        mainWindow = MainWindow()
+        mainWindow = MainWindow('Servidor')
         mainWindow.show()
 
         juego = HiloJuego(mainWindow)

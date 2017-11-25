@@ -14,9 +14,9 @@ class MainWindow(QMainWindow):
     procesarJugada = pyqtSignal(dict)
     cambiarRonda = pyqtSignal(dict)
 
-    def __init__(self):
+    def __init__(self, tituloVentana):
         super().__init__()
-        self.setWindowTitle('Dominó (Servidor)')
+        self.setWindowTitle('Dominó ({})'.format(tituloVentana))
         self.ancho = 960
         self.alto = 610
 

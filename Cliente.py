@@ -1,17 +1,19 @@
 import sys
 from PyQt5.QtWidgets import QApplication, QInputDialog
 from MainWindow import MainWindow
+from Cliente.PreferencesDialog import PreferencesDialog
 from Cliente.HiloJuego import HiloJuego
 
 if __name__ == '__main__':
     try:
         mainApp = QApplication(sys.argv)
 
-        mainWindow = MainWindow()
+        mainWindow = MainWindow('Cliente')
         mainWindow.show()
-        nombre = QInputDialog.getText(mainWindow, "Nombre de jugador", "Ingrese su nombre de jugador")
 
-        juego = HiloJuego(mainWindow, nombre[0])
+        opciones = PreferencesDialog.getPreferences(mainWindow)
+
+        juego = HiloJuego(mainWindow, opciones)
         juego.start()
 
         mainApp.exec_()

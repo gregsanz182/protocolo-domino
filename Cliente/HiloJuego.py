@@ -19,18 +19,17 @@ class HiloJuego(threading.Thread):
         self.address_server = None
         self.puntuacion = 0
         self.ronda = 0
-        self.mesas = []
+        self.mesa = {}
         self.fichas = []
         self.jugadores = []
         self.tablero = []
         self.iniciarUDP()
 
     def run(self):
-        tiempoInicio = time.time()
         try:
-            mesa = self.seleccionarMesa(tiempoInicio)
+            self.seleccionarMesa()
             self.cerrarUDP()
-            self.iniciarTCP(mesa-1)
+            self.iniciarTCP()
             mensaje_json = {
                 'identificador': self.identificadorProtocolo,
                 'nombre_jugador': self.nombre
@@ -161,33 +160,25 @@ class HiloJuego(threading.Thread):
                 print(mensaje_json)
 
         except socket.error:
-            print('Mesa fuera de alcanse o llena... lo sentimos')
+            print('Mesa fuera de alcance o llena... lo sentimos')
         self.cerrarUDP()
 
-    def seleccionarMesa(self, tiempoInicio):
-        while True:
-            mensaje, address = self.sockUDP.recvfrom(4096)
-            mensaje_json = json.loads(mensaje.decode('utf-8'))
-            if mensaje_json.get('identificador') == self.identificadorProtocolo and 'nombre_mesa' in mensaje_json:
-                band = True
-                for mesa in self.mesas:
-                    if mesa.get('nombre') == mensaje_json['nombre_mesa']:
-                        band = False
-                if band:
-                    self.mesas.append({'nombre':mensaje_json['nombre_mesa'],'direccion':address[0]})
-            if (time.time() - tiempoInicio) > 2 and len(self.mesas) > 0:
-                while True:
-                    print('Mesas disponibles')
-                    for i, mesa in enumerate(self.mesas):
-                        print('Mesa: {0} Nombre de la mesa: {1}'.format((i+1),mesa['nombre']))
-                    opcion = int(input('Selecciona una mesa por el numero: '))
-                    if opcion > 0 and opcion <= len(self.mesas):
-                        return opcion
-                    else:
-                        print('Opcion incorrecta, vuelva a intentarlo')
-            if (time.time() - tiempoInicio) > 20 and len(self.mesas) == 0:
-                print('tiempo agotado en espera de mesas...')
-                return -1
+    def seleccionarMesa(self):
+        self.banderaBuscarServer = True
+        self.mainWindow.abrirServidoresDialog.emit(self.mesaSeleccionada)
+        while self.banderaBuscarServer:
+            try:
+                mensaje, address = self.sockUDP.recvfrom(4096)
+                mensaje_json = json.loads(mensaje.decode('utf-8'))
+                if mensaje_json.get('identificador') == self.identificadorProtocolo and 'nombre_mesa' in mensaje_json:
+                    self.mainWindow.nuevoServidor.emit({'nombre': mensaje_json['nombre_mesa'], 'direccion': address[0]})
+            except (socket.timeout, ValueError):
+                pass
+
+    def mesaSeleccionada(self, serverInfo):
+        print(serverInfo)
+        self.banderaBuscarServer = False
+        self.mesa = serverInfo
 
     def jugar(self, punta_uno, punta_dos, evento_pasado):
         f = fi = None
@@ -263,14 +254,17 @@ class HiloJuego(threading.Thread):
         self.sockUDP = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         self.sockUDP.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)
         self.sockUDP.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+        self.sockUDP.setblocking(1)
+        self.sockUDP.settimeout(1)
         self.sockUDP.bind(UDPendpoint)
 
     def cerrarUDP(self):
         self.sockUDP.close()
 
-    def iniciarTCP(self,mesa):
+    def iniciarTCP(self):
         self.sockTCP = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        self.TCPendpoint = (self.mesas[mesa]['direccion'],3001)        
+        print(self.mesa['direccion'])
+        self.TCPendpoint = (self.mesa['direccion'], 3001)        
         self.sockTCP.connect(self.TCPendpoint)
 
     def enviarTCP(self,mensaje):

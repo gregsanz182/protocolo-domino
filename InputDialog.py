@@ -1,28 +1,5 @@
-from PyQt5.QtWidgets import QDialog, QPushButton, QVBoxLayout, QLabel, QTableWidget, QInputDialog, QLineEdit, QHBoxLayout, QMessageBox
+from PyQt5.QtWidgets import QDialog, QPushButton, QVBoxLayout, QLabel, QInputDialog, QLineEdit, QHBoxLayout
 from PyQt5.QtCore import QSize, Qt
-
-class PreferencesDialog(QDialog):
-
-    def __init__(self, padre=None):
-        super().__init__(padre)
-        self.setWindowTitle('Servidores')
-        self.layout = QVBoxLayout(self)
-        self.setFixedSize(QSize(420, 320))
-
-        self.labelDescripcion = QLabel("Selecciona una de las siguientes mesas disponibles:")
-        self.tablaServidores = QTableWidget()
-        self.botonConectar = QPushButton("Conectar")
-
-        self.layout.addWidget(self.labelDescripcion)
-        self.layout.addWidget(self.tablaServidores)
-        self.layout.addWidget(self.botonConectar)
-
-    @staticmethod
-    def getPreferences(padre=None):
-        nombre = InputDialog.getText("Nombre de jugador", "Ingrese su nombre de jugador (máximo 13 caracteres)", padre)
-        dialog = PreferencesDialog(padre)
-        dialog.show()
-        dialog.exec_()
 
 class InputDialog(QDialog):
 
@@ -44,11 +21,11 @@ class InputDialog(QDialog):
         self.layout2.addStretch()
         self.layout2.addWidget(self.botonAceptar)
         self.layout2.addStretch()
-        self.botonAceptar.clicked.connect(self.aceptarNombre)
+        self.botonAceptar.clicked.connect(self.aceptarTexto)
         self.setModal(True)
         self.setWindowFlag(Qt.WindowCloseButtonHint, False)
 
-    def aceptarNombre(self):
+    def aceptarTexto(self):
         self.close()
 
     @staticmethod

@@ -5,6 +5,7 @@ from PyQt5.QtWidgets import QApplication, QMainWindow, QWidget, QFrame, QStyle, 
 from PyQt5.QtCore import pyqtSignal
 from ZonaJuego import ZonaJuego
 from PanelJugador import PanelJugador
+from ServidoresDialog import ServidoresDialog
 
 class MainWindow(QMainWindow):
 
@@ -13,6 +14,8 @@ class MainWindow(QMainWindow):
     ponerManoJugador = pyqtSignal(dict, str)
     procesarJugada = pyqtSignal(dict)
     cambiarRonda = pyqtSignal(dict)
+    abrirServidoresDialog = pyqtSignal(object)
+    nuevoServidor = pyqtSignal(dict)
 
     def __init__(self, tituloVentana):
         super().__init__()
@@ -51,6 +54,8 @@ class MainWindow(QMainWindow):
         self.ponerManoJugador.connect(self.ponerManoJugadorSlot)
         self.procesarJugada.connect(self.procesarJugadaSlot)
         self.cambiarRonda.connect(self.cambiarRondaSlot)
+        self.abrirServidoresDialog.connect(self.abrirServidoresDialogSlot)
+        self.nuevoServidor.connect(self.nuevoServerDialogSlot)
 
     def setWidgetCentral(self):
         self.widgetCentral = QFrame()
@@ -100,7 +105,14 @@ class MainWindow(QMainWindow):
         for key in self.jugadores.keys():
             self.jugadores[key].borrarFichas()
         self.zonaJuego.limpiarZonaJuego()
+
+    def abrirServidoresDialogSlot(self, metodoSlot):
+        self.dialog = ServidoresDialog(metodoSlot, self)
+        self.dialog.show()
     
+    def nuevoServerDialogSlot(self, serverInfo):
+        self.dialog.nuevoServer(serverInfo)
+
 if __name__ == '__main__':
     try:
         QApplication.setStyle('Fusion')

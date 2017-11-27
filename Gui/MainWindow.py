@@ -3,9 +3,9 @@ import random
 import json
 from PyQt5.QtWidgets import QApplication, QMainWindow, QWidget, QFrame, QStyle, QLabel
 from PyQt5.QtCore import pyqtSignal
-from ZonaJuego import ZonaJuego
-from PanelJugador import PanelJugador
-from ServidoresDialog import ServidoresDialog
+from Gui.ZonaJuego import ZonaJuego
+from Gui.PanelJugador import PanelJugador
+from Gui.ServidoresDialog import ServidoresDialog
 
 class MainWindow(QMainWindow):
 

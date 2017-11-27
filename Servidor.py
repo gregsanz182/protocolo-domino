@@ -1,6 +1,6 @@
 import sys
 from PyQt5.QtWidgets import QApplication
-from MainWindow import MainWindow
+from Gui.MainWindow import MainWindow
 from Servidor.HiloJuego import HiloJuego
 
 if __name__ == '__main__':

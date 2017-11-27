@@ -1,5 +1,5 @@
 from PyQt5.QtWidgets import QWidget, QFrame
-from Ficha import Ficha
+from Gui.Ficha import Ficha
 
 class ZonaJuego(QFrame):
 

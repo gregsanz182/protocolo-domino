@@ -1,7 +1,7 @@
 import sys
 from PyQt5.QtWidgets import QApplication, QInputDialog
-from MainWindow import MainWindow
-from InputDialog import InputDialog
+from Gui.MainWindow import MainWindow
+from Gui.InputDialog import InputDialog
 from Cliente.HiloJuego import HiloJuego
 
 if __name__ == '__main__':

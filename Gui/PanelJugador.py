@@ -1,7 +1,7 @@
 import random
 from PyQt5.QtWidgets import QFrame, QLabel
 from PyQt5.QtCore import Qt
-from Ficha import Ficha
+from Gui.Ficha import Ficha
 
 class PanelJugador(QFrame):
 

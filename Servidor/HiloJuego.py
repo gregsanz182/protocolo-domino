@@ -12,9 +12,10 @@ from Servidor.Fichas import Fichas
 
 class HiloJuego(threading.Thread):
 
-    def __init__(self, mainWindow):
+    def __init__(self, nombre, mainWindow):
         super().__init__()
         self.mainWindow = mainWindow
+        self.nombreMesa = nombre
         self.identificadorProtocolo = 'DOMINOCOMUNICACIONESI'
         self.TCPendpoint = ('0.0.0.0', 3001)
         self.sockTCP = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -27,7 +28,7 @@ class HiloJuego(threading.Thread):
             'multicast_ip': self.multicastendpoint[0]
         }
         self.jugadores = []
-        self.disp = HiloDisponibilidad(self.identificadorProtocolo)
+        self.disp = HiloDisponibilidad(self.nombreMesa, self.identificadorProtocolo)
 
     def run(self):
         self.lobby()

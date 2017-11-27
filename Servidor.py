@@ -1,6 +1,7 @@
 import sys
 from PyQt5.QtWidgets import QApplication
 from Gui.MainWindow import MainWindow
+from Gui.InputDialog import InputDialog
 from Servidor.HiloJuego import HiloJuego
 
 if __name__ == '__main__':
@@ -10,7 +11,9 @@ if __name__ == '__main__':
         mainWindow = MainWindow('Servidor')
         mainWindow.show()
 
-        juego = HiloJuego(mainWindow)
+        nombre = InputDialog.getText("Nombre", "Ingrese el nombre para la mesa", mainWindow)
+
+        juego = HiloJuego(nombre, mainWindow)
         juego.start()
 
         mainApp.exec_()

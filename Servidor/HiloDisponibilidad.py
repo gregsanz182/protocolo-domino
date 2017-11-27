@@ -6,13 +6,13 @@ import time
 
 class HiloDisponibilidad(threading.Thread):
 
-    def __init__(self, identificadorProtocolo):
+    def __init__(self, nombreMesa, identificadorProtocolo):
         super().__init__()
         self.identificadorProtocolo = identificadorProtocolo
         self.UDPendpoint = ('255.255.255.255', 3001)
         self.mesaJson = {
             'identificador': 'DOMINOCOMUNICACIONESI',
-            'nombre_mesa': 'la que más aplaude'
+            'nombre_mesa': nombreMesa
         }
 
     def run(self):

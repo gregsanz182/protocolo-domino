@@ -3,7 +3,7 @@ from PyQt5.QtCore import QSize, Qt
 
 class InputDialog(QDialog):
 
-    def __init__(self, tituloVentana, textoLabel, padre=None):
+    def __init__(self, tituloVentana, textoLabel, maxLongitud=50, padre=None):
         super().__init__(padre)
         self.setWindowTitle(tituloVentana)
         self.layout = QVBoxLayout(self)
@@ -12,7 +12,7 @@ class InputDialog(QDialog):
         self.lineEdit = QLineEdit()
         self.lineEdit.setFixedHeight(23)
         self.lineEdit.setStyleSheet("font-size: 13px;")
-        self.lineEdit.setMaxLength(13)
+        self.lineEdit.setMaxLength(maxLongitud)
         self.layout.addWidget(self.lineEdit)
         self.botonAceptar = QPushButton("Aceptar")
         self.botonAceptar.setFixedHeight(28)
@@ -29,8 +29,8 @@ class InputDialog(QDialog):
         self.close()
 
     @staticmethod
-    def getText(tituloVentana, textoLabel, padre=None):
-        d = InputDialog(tituloVentana, textoLabel, padre)
+    def getText(tituloVentana, textoLabel, maxLongitud=50, padre=None):
+        d = InputDialog(tituloVentana, textoLabel, maxLongitud, padre)
         d.show()
         d.exec_()
         return d.lineEdit.text()

@@ -11,7 +11,7 @@ if __name__ == '__main__':
         mainWindow = MainWindow('Cliente')
         mainWindow.show()
 
-        nombre = InputDialog.getText("Nombre", "Ingrese su nombre de jugador", mainWindow)
+        nombre = InputDialog.getText("Nombre", "Ingrese su nombre de jugador (máximo 13 caracteres)", 13, mainWindow)
 
         juego = HiloJuego(mainWindow, nombre)
         juego.start()

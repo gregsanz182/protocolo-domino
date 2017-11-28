@@ -2,7 +2,7 @@ import sys
 import random
 import json
 from PyQt5.QtWidgets import QApplication, QMainWindow, QWidget, QFrame, QStyle, QLabel
-from PyQt5.QtCore import pyqtSignal
+from PyQt5.QtCore import pyqtSignal, Qt
 from Gui.ZonaJuego import ZonaJuego
 from Gui.PanelJugador import PanelJugador
 from Gui.ServidoresDialog import ServidoresDialog
@@ -16,6 +16,7 @@ class MainWindow(QMainWindow):
     cambiarRonda = pyqtSignal(dict)
     abrirServidoresDialog = pyqtSignal(object)
     nuevoServidor = pyqtSignal(dict)
+    setLabelMesa = pyqtSignal(str)
 
     def __init__(self, tituloVentana):
         super().__init__()
@@ -30,23 +31,23 @@ class MainWindow(QMainWindow):
         self.jugadores = {}
         self.zonaJuego = ZonaJuego(self)
 
-        self.labelRonda = QLabel('Ronda #0', self)
+        self.labelRonda = QLabel('', self)
         self.labelRonda.setStyleSheet('font-size: 23px; color: #FFFFFF; font-weight: 500')
         self.labelRonda.setFixedWidth(200)
         self.labelRonda.move(16, 14)
 
+        self.labelMensaje = QLabel('', self)
+        self.labelMensaje.setStyleSheet('font-size: 13px; color: #FFFFFF; font-weight: 400')
+        self.labelMensaje.setFixedWidth(300)
+        self.labelMensaje.move(17, 40)
+
+        self.labelMesa = QLabel('', self)
+        self.labelMesa.setAlignment(Qt.AlignRight)
+        self.labelMesa.setStyleSheet('font-size: 13px; color: #FFFFFF; font-weight: 400; font-style: italic')
+        self.labelMesa.setFixedWidth(250)
+        self.labelMesa.move(690, 565)
+
         self.realizarConexiones()
-
-        """for i in range(0, 28):
-            self.zonaJuego.ponerFicha(-1, -1, 0)
-        for i in range(0, 28):
-            self.zonaJuego.ponerFicha(random.randint(0, 6), random.randint(0, 6), 1)
-
-        f = PanelJugador('AAAAAAAAAAAAA...', 0, padre=self)
-        f.inicializarFichas(None)
-        PanelJugador('AAAAAAAAAAAAA...', 1, padre=self)
-        PanelJugador('AAAAAAAAAAAAA...', 2, padre=self)
-        PanelJugador('AAAAAAAAAAAAA...', 3, padre=self)"""
 
     def realizarConexiones(self):
         self.inicializarJugador.connect(self.inicializarJugadorSlot)
@@ -56,6 +57,7 @@ class MainWindow(QMainWindow):
         self.cambiarRonda.connect(self.cambiarRondaSlot)
         self.abrirServidoresDialog.connect(self.abrirServidoresDialogSlot)
         self.nuevoServidor.connect(self.nuevoServerDialogSlot)
+        self.setLabelMesa.connect(self.setLabelMesaSlot)
 
     def setWidgetCentral(self):
         self.widgetCentral = QFrame()
@@ -112,6 +114,9 @@ class MainWindow(QMainWindow):
     
     def nuevoServerDialogSlot(self, serverInfo):
         self.dialog.nuevoServer(serverInfo)
+
+    def setLabelMesaSlot(self, nombreMesa):
+        self.labelMesa.setText(nombreMesa+" ")
 
 if __name__ == '__main__':
     try:

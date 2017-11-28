@@ -30,6 +30,10 @@ class HiloJuego(threading.Thread):
             self.seleccionarMesa()
             self.cerrarUDP()
             self.iniciarTCP()
+
+            #LLamada a entorno gráfico
+            self.mainWindow.setLabelMesa.emit(self.mesa['nombre'])
+
             mensaje_json = {
                 'identificador': self.identificadorProtocolo,
                 'nombre_jugador': self.nombre
@@ -37,8 +41,10 @@ class HiloJuego(threading.Thread):
             self.enviarTCP(mensaje_json)
             mensaje_json = self.escucharTCP()
             if mensaje_json.get('identificador') == self.identificadorProtocolo and 'multicast_ip' in mensaje_json and 'jugador' in mensaje_json:
+
                 #llamada a la interfaz gráfica
                 self.mainWindow.inicializarJugador.emit(mensaje_json, self.nombre)
+                
                 self.miIdentificador = mensaje_json['jugador']
                 self.iniciarMulticast(mensaje_json['multicast_ip'])
                 terminoPartida = False

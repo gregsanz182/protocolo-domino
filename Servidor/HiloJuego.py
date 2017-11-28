@@ -31,11 +31,12 @@ class HiloJuego(threading.Thread):
         self.disp = HiloDisponibilidad(self.nombreMesa, self.identificadorProtocolo)
 
     def run(self):
+        self.mainWindow.setLabelMesa.emit(self.nombreMesa)
         self.lobby()
         self.iniciarjuego()
 
     def lobby(self):
-        self.enviarUDP()
+        self.iniciarIdentificacionUDP()
         self.sockTCP.bind(self.TCPendpoint)
         self.sockTCP.listen(4)
         self.sockTCP.setblocking(1)
@@ -44,9 +45,8 @@ class HiloJuego(threading.Thread):
         countdown = False
         while (time.time() - tiempo_comienzo) < 15 and len(self.jugadores) < 4:
             try:
-                print('esperando conexiones de los clientes')
+                print('Esperando conexiones de los clientes')
                 conexion, direccion_cliente = self.sockTCP.accept()
-                print('pasa')
                 if conexion:
                     mensaje = conexion.recv(4096)
                     print('{0} intenta conectarse'.format(direccion_cliente))
@@ -71,12 +71,12 @@ class HiloJuego(threading.Thread):
             if countdown == False:
                 tiempo_comienzo = time.time()
         
-        self.detenerUDP()
+        self.detenerIdentificacionUDP()
     
-    def enviarUDP(self):
+    def iniciarIdentificacionUDP(self):
         self.disp.start()
 
-    def detenerUDP(self):
+    def detenerIdentificacionUDP(self):
         self.disp.activo = False
 
     def iniciarjuego(self):
@@ -90,7 +90,7 @@ class HiloJuego(threading.Thread):
         for jugador in self.jugadores:
             mensajeJuego['jugadores'].append({'identificador':jugador.idenJugador,'nombre':jugador.nombre})
         self.enviarMulticast(mensajeJuego)
-        time.sleep(1)
+        time.sleep(2)
         contadorPuntos = 0
         while contadorPuntos < 100:
             print("Iniciando Ronda #{}".format(self.ronda))
@@ -130,7 +130,8 @@ class HiloJuego(threading.Thread):
                         'jugador': jugadorGanador.idenJugador,
                         'tipo': 4,
                         'puntuacion': self.calcularPuntuacion(jugadorGanador),
-                        'razon': razon
+                        'razon': razon,
+                        'evento_pasado': evento_pasado
                     }
                     contadorPuntos += self.calcularPuntuacion(jugadorGanador)
                     jugando = False

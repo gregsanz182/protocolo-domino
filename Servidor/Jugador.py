@@ -9,6 +9,7 @@ class Jugador():
         self.fichas = []
         self.socketTCP = socket
         self.idenJugador = idenJugador
+        self.puntos = 0
     
     def enviarFicha(self, identificador):
         men = {
@@ -34,3 +35,7 @@ class Jugador():
             if pinta in [ficha['entero_uno'], ficha['entero_dos']]:
                 return True
         return False
+
+    def aumentarPuntos(self, suma):
+        self.puntos += suma
+        

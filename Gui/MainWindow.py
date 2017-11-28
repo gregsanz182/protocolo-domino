@@ -100,12 +100,14 @@ class MainWindow(QMainWindow):
         self.jugadores[mensaje_dict['jugador']].cambiarEstado(3)
         if mensaje_dict['tipo'] == 4:
             self.jugadores[mensaje_dict['jugador']].cambiarPuntuacion(mensaje_dict['puntuacion'])
+            self.jugadores[mensaje_dict['jugador']].cambiarEstado(5)
 
 
     def cambiarRondaSlot(self, mensaje_dict):
         self.labelRonda.setText("Ronda #{}".format(mensaje_dict['ronda']))
         for key in self.jugadores.keys():
             self.jugadores[key].borrarFichas()
+            self.jugadores[key].cambiarEstado(4)
         self.zonaJuego.limpiarZonaJuego()
 
     def abrirServidoresDialogSlot(self, metodoSlot):
@@ -117,21 +119,3 @@ class MainWindow(QMainWindow):
 
     def setLabelMesaSlot(self, nombreMesa):
         self.labelMesa.setText(nombreMesa+" ")
-
-if __name__ == '__main__':
-    try:
-        QApplication.setStyle('Fusion')
-        mainApp = QApplication(sys.argv)
-
-        mainWindow = MainWindow()
-        mainWindow.show()
-
-        mainApp.exec_()
-
-        sys.exit(0)
-    except NameError:
-        print("Nombre del error:", sys.exc_info()[1])
-    except SystemExit:
-        print("Cerrando la ventana...")
-    except Exception:
-        print(sys.exc_info()[1])

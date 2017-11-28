@@ -63,7 +63,7 @@ class HiloJuego(threading.Thread):
                         self.mainWindow.inicializarJugador.emit(respJson, mensaje_json['nombre_jugador'])
 
                         tiempo_comienzo = time.time()
-                        if len(self.jugadores) == 2:
+                        if len(self.jugadores) == 1:
                             countdown = True
             except (socket.timeout, ValueError):
                 pass
@@ -129,11 +129,12 @@ class HiloJuego(threading.Thread):
                         'identificador': self.identificadorProtocolo,
                         'jugador': jugadorGanador.idenJugador,
                         'tipo': 4,
-                        'puntuacion': self.calcularPuntuacion(jugadorGanador),
+                        'puntuacion': self.calcularYSumarPuntuacion(jugadorGanador),
                         'razon': razon,
-                        'evento_pasado': evento_pasado
+                        'evento_pasado': evento_pasado,
+                        'punta_uno': tableroCola[0],
+                        'punta_dos': tableroCola[len(tableroCola)-1]
                     }
-                    contadorPuntos += self.calcularPuntuacion(jugadorGanador)
                     jugando = False
                 else:
                     jugadorTurno = self.jugadores[(self.jugadores.index(jugadorTurno)+1)%len(self.jugadores)]
@@ -153,6 +154,7 @@ class HiloJuego(threading.Thread):
                     print(mensajeJuego)
                 self.mainWindow.procesarJugada.emit(mensajeJuego)
                 self.enviarMulticast(mensajeJuego)
+            time.sleep(2)
         mensajeJuego = {
             'identificador': self.identificadorProtocolo,
             'jugador': jugadorGanador.idenJugador,
@@ -160,7 +162,7 @@ class HiloJuego(threading.Thread):
             'razon': razon
         }
         puntuacion_general = []
-        for jugador in jugadores:
+        for jugador in self.jugadores:
             puntuacion_general.append({'jugador': jugador['idenJugador'], 'puntuacion': self.calcularPuntuacion(jugador)})
 
             
@@ -283,12 +285,13 @@ class HiloJuego(threading.Thread):
                 return False
         return True
     
-    def calcularPuntuacion(self, jugador):
+    def calcularYSumarPuntuacion(self, jugador):
         suma = 0
         for player in self.jugadores:
             if player != jugador:
                 suma += player.contarPintas()
         
+        jugador.aumentarPuntos(suma)
         return suma
 
     def cerrarTodo(self):

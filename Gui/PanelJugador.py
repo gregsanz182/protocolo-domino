@@ -9,7 +9,9 @@ class PanelJugador(QFrame):
         {"texto": "Jugó", "style": 'font-size: 19px; color: #00FF40;'},
         {"texto": "Erroneo", "style": 'font-size: 19px; color: #FF2626;'},
         {"texto": "Pasó", "style": 'font-size: 19px; color: #FF2626;'},
-        {"texto": "Turno", "style": 'font-size: 19px; color: #F3D352;'} 
+        {"texto": "Turno", "style": 'font-size: 19px; color: #F3D352;'},
+        {"texto": "Esperando", "style": 'font-size: 19px; color: #007FFF;'},
+        {"texto": "Ganó", "style": 'font-size: 19px; color: #00FF40;'}
     ]
 
     def __init__(self, nombre, numJug, padre=None):
@@ -143,4 +145,4 @@ class PanelJugador(QFrame):
         self.estadoLabel.setStyleSheet(self.estados[estado]['style'])
 
     def cambiarPuntuacion(self, puntuacion):
-        self.puntosLabel.setText(puntuacion+" puntos")
+        self.puntosLabel.setText(str(puntuacion)+" puntos")

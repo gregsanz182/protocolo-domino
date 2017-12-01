@@ -121,7 +121,7 @@ class HiloJuego(threading.Thread):
                                             print('YUPIIIIIIIIIIIII GANE LA PARTIDA')
                                             print('Puntuacion: {!r}'.format(mensaje_json['puntuacion']))
                                             print('Puntuación general')
-                                            for j in mensaje['puntuacion_general']:
+                                            for j in mensaje_json['puntuacion_general']:
                                                 print('Jugador: {!r} puntuación: {!r}'.format(j['jugador'], j['puntuacion']))
                                             print('Razón: {!r}'.format(mensaje_json['razon']))
                                             terminoPartida = True
@@ -153,7 +153,7 @@ class HiloJuego(threading.Thread):
                                             print('...Fin de la partida...')
                                             print('Ganador{!r}'.format(mensaje_json['jugador']))
                                             print('Puntuación general')
-                                            for j in mensaje['puntuacion_general']:
+                                            for j in mensaje_json['puntuacion_general']:
                                                 print('Jugador: {!r} puntuación: {!r}'.format(j['jugador'], j['puntuacion']))
                                             print('Razón: {!r}'.format(mensaje['razon']))
                                             terminoPartida = True
@@ -285,10 +285,10 @@ class HiloJuego(threading.Thread):
 
     def iniciarMulticast(self,direccion):
         self.sockMulticast = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-        self.sockMulticast.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-        self.sockMulticast.bind(('0.0.0.0', 3001))
         membership = struct.pack("4sl", socket.inet_aton(direccion), socket.INADDR_ANY)
+        self.sockMulticast.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         self.sockMulticast.setsockopt(socket.IPPROTO_IP, socket.IP_ADD_MEMBERSHIP, membership)
+        self.sockMulticast.bind(('192.168.0.3', 3001))
 
     def escucharMulticast(self):
         mensaje, address= self.sockMulticast.recvfrom(4096)

@@ -63,7 +63,7 @@ class HiloJuego(threading.Thread):
                         self.mainWindow.inicializarJugador.emit(respJson, mensaje_json['nombre_jugador'])
 
                         tiempo_comienzo = time.time()
-                        if len(self.jugadores) == 1:
+                        if len(self.jugadores) == 2:
                             countdown = True
             except (socket.timeout, ValueError):
                 pass
@@ -152,8 +152,11 @@ class HiloJuego(threading.Thread):
                 print('')
                 if mensajeJuego['tipo'] == 1:
                     print(mensajeJuego)
+
+                #llamada a interfaz gráfica
                 self.mainWindow.procesarJugada.emit(mensajeJuego)
                 self.enviarMulticast(mensajeJuego)
+
             time.sleep(2)
         mensajeJuego = {
             'identificador': self.identificadorProtocolo,

@@ -39,7 +39,7 @@ class PanelJugador(QFrame):
             self.estadoLabel.setFixedWidth(138)
             self.estadoLabel.move(0, 38)
         elif self.numJug == 1:
-            self.setGeometry(786, 154, 160, 365)
+            self.setGeometry(786, 156, 160, 365)
             self.nombreLabel.setAlignment(Qt.AlignRight)
             self.nombreLabel.setFixedWidth(154)
             self.nombreLabel.move(0, 308)

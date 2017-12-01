@@ -5,14 +5,21 @@ from Gui.Ficha import Ficha
 
 class PanelJugador(QFrame):
 
-    estados = [
-        {"texto": "Jugó", "style": 'font-size: 19px; color: #00FF40;'},
-        {"texto": "Erroneo", "style": 'font-size: 19px; color: #FF2626;'},
-        {"texto": "Pasó", "style": 'font-size: 19px; color: #FF2626;'},
-        {"texto": "Turno", "style": 'font-size: 19px; color: #F3D352;'},
-        {"texto": "Esperando", "style": 'font-size: 19px; color: #007FFF;'},
-        {"texto": "Ganó", "style": 'font-size: 19px; color: #00FF40;'}
-    ]
+    jugo = 0
+    erroneo = 1
+    paso = 2
+    turno = 3
+    esperando = 4
+    gano = 5
+
+    estados = {
+        jugo: {"texto": "Jugó", "style": 'font-size: 19px; color: #007FFF;'},
+        erroneo: {"texto": "Erroneo", "style": 'font-size: 19px; color: #AAAAAA;'},
+        paso: {"texto": "Pasó", "style": 'font-size: 19px; color: #FF2626;'},
+        turno: {"texto": "Turno", "style": 'font-size: 19px; color: #F3D352;'},
+        esperando: {"texto": "Esperando", "style": 'font-size: 19px; color: #DDDDDD;'},
+        gano: {"texto": "Ganó", "style": 'font-size: 19px; color: #00FF40;'}
+    }
 
     def __init__(self, nombre, numJug, padre=None):
         super().__init__(padre)
@@ -24,7 +31,7 @@ class PanelJugador(QFrame):
         self.puntosLabel = QLabel("0 puntos", self) 
         self.puntosLabel.setStyleSheet('font-size: 12px; color: #FFFFFF;')
         self.estadoLabel = QLabel('Esperando', self)
-        self.estadoLabel.setStyleSheet('font-size: 19px; color: #007FFF;')
+        self.estadoLabel.setStyleSheet(self.estados[self.esperando]['style'])
         if self.numJug == 0:
             self.setGeometry(181, 519, 450, 80)
             self.nombreLabel.setAlignment(Qt.AlignRight)

@@ -11,7 +11,7 @@ class MainWindow(QMainWindow):
 
     inicializarJugador = pyqtSignal(dict, str)
     inicializarJugadores = pyqtSignal(dict)
-    ponerManoJugador = pyqtSignal(dict, str)
+    ponerManoJugador = pyqtSignal(object, str)
     procesarJugada = pyqtSignal(dict)
     cambiarRonda = pyqtSignal(dict)
     abrirServidoresDialog = pyqtSignal(object)
@@ -29,6 +29,7 @@ class MainWindow(QMainWindow):
         self.setWidgetCentral()
 
         self.jugadores = {}
+        self.rondaActual = 0
         self.zonaJuego = ZonaJuego(self)
 
         self.labelRonda = QLabel('', self)
@@ -39,7 +40,7 @@ class MainWindow(QMainWindow):
         self.labelMensaje = QLabel('', self)
         self.labelMensaje.setStyleSheet('font-size: 13px; color: #FFFFFF; font-weight: 400')
         self.labelMensaje.setFixedWidth(300)
-        self.labelMensaje.move(17, 40)
+        self.labelMensaje.move(17, 45)
 
         self.labelMesa = QLabel('', self)
         self.labelMesa.setAlignment(Qt.AlignRight)
@@ -76,11 +77,13 @@ class MainWindow(QMainWindow):
         for jugador in mensaje_dict["jugadores"]:
             if jugador['identificador'] not in iter(self.jugadores.keys()):
                 jug = PanelJugador(jugador.get('nombre', "Jugador #{}".format(len(self.jugadores)+1)), len(self.jugadores), self)
-                jug.inicializarFichas(None)
                 self.jugadores[jugador['identificador']] = jug
 
     def ponerManoJugadorSlot(self, mensaje_dict, idenJugador):
-        self.jugadores[idenJugador].inicializarFichas(mensaje_dict['fichas'])
+        if mensaje_dict is None:
+            self.jugadores[idenJugador].inicializarFichas(None)
+        else:
+            self.jugadores[idenJugador].inicializarFichas(mensaje_dict['fichas'])
 
     def procesarJugadaSlot(self, mensaje_dict):
         if 'evento_pasado' in mensaje_dict:
@@ -97,17 +100,19 @@ class MainWindow(QMainWindow):
                         self.zonaJuego.ponerFicha(mensaje_dict['evento_pasado']['ficha']['entero_dos'], mensaje_dict['evento_pasado']['ficha']['entero_uno'], mensaje_dict['evento_pasado']['punta'])
                 self.jugadores[mensaje_dict['evento_pasado']['jugador']].quitarFicha(mensaje_dict['evento_pasado']['ficha'])
             self.jugadores[mensaje_dict['evento_pasado']['jugador']].cambiarEstado(mensaje_dict['evento_pasado']['tipo'])
-        self.jugadores[mensaje_dict['jugador']].cambiarEstado(3)
+        self.jugadores[mensaje_dict['jugador']].cambiarEstado(PanelJugador.turno)
         if mensaje_dict['tipo'] == 4:
             self.jugadores[mensaje_dict['jugador']].cambiarPuntuacion(mensaje_dict['puntuacion'])
-            self.jugadores[mensaje_dict['jugador']].cambiarEstado(5)
+            self.jugadores[mensaje_dict['jugador']].cambiarEstado(PanelJugador.gano)
+            self.labelMensaje.setText('"{0}" ha ganado la ronda #{1}\nPor: {2}'.format(self.jugadores[mensaje_dict['jugador']].nombre, self.rondaActual, mensaje_dict['razon']))
 
 
     def cambiarRondaSlot(self, mensaje_dict):
         self.labelRonda.setText("Ronda #{}".format(mensaje_dict['ronda']))
+        self.rondaActual = int(mensaje_dict['ronda'])
         for key in self.jugadores.keys():
             self.jugadores[key].borrarFichas()
-            self.jugadores[key].cambiarEstado(4)
+            self.jugadores[key].cambiarEstado(PanelJugador.esperando)
         self.zonaJuego.limpiarZonaJuego()
 
     def abrirServidoresDialogSlot(self, metodoSlot):

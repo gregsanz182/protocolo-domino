@@ -12,6 +12,12 @@ class HiloJuego(threading.Thread):
 
     def __init__(self, mainWindow, nombre):
         super().__init__()
+
+        """Si tienes problemas para recibir los mensajes multicast o Windows arroja un error de dirección no
+        permitida para la direccion multicast, coloca la ip de la interfaz por donde escuchará el programa.
+        Normalmente esta suele ser la principal o denominada "Ethernet" en los adaptadores de red"""
+        self.bindDir = '0.0.0.0' #Direccion Bind (Colocar solo si es windows)
+
         self.mainWindow = mainWindow
         self.nombre = nombre
         self.identificadorProtocolo = 'DOMINOCOMUNICACIONESI'
@@ -56,21 +62,38 @@ class HiloJuego(threading.Thread):
                         if mensaje_json['tipo'] == 0 and 'jugadores' in mensaje_json:
                             mensaje_inicio = mensaje_json
                             self.guardarJugadores(mensaje_inicio['jugadores'])
+
                             #llamada a la interfaz gráfica
                             self.mainWindow.inicializarJugadores.emit(mensaje_inicio)
+
                         elif mensaje_json['tipo'] == 1 and 'ronda' in mensaje_json:
                             mensaje_ronda = mensaje_json
                             self.ronda = mensaje_ronda['ronda']
+
+                            #llamada a interfaz gráfica
+                            self.mainWindow.cambiarRonda.emit(mensaje_ronda)
+
                             mensaje_json = self.escucharTCP()
                             if mensaje_json['tipo'] == 2 and 'fichas' in mensaje_json:
                                 mensaje_fichas = mensaje_json
                                 self.guardarFichas(mensaje_fichas['fichas'])
+                                
+                                #llamada a interfaz gráfica
+                                self.mainWindow.ponerManoJugador.emit(mensaje_fichas, self.miIdentificador)
+
+                                for jugador in self.jugadores:
+                                    self.mainWindow.ponerManoJugador.emit(None, jugador['identificador'])
+
                             terminoRonda = False
                             while not terminoRonda:
                                 mensaje_json, address = self.escucharMulticast()
                                 print('pasa multicast')
                                 print('mensaje entrante: {}'.format(mensaje_json))
                                 if mensaje_json.get('identificador') == self.identificadorProtocolo and 'jugador' in mensaje_json and 'tipo' in mensaje_json:
+
+                                    #llamada a interfaz gráfica
+                                    self.mainWindow.procesarJugada.emit(mensaje_json)
+
                                     # *********************************  YO  **************************************
                                     if mensaje_json['jugador'] == self.miIdentificador:
                                         print('juego yo')
@@ -245,7 +268,8 @@ class HiloJuego(threading.Thread):
 
     def guardarJugadores(self,j):
         for jugador in j:
-            self.jugadores.append(jugador)
+            if jugador['identificador'] != self.miIdentificador:
+                self.jugadores.append(jugador)
 
     def guardarFichas(self,f):
         self.tablero = []
@@ -287,8 +311,9 @@ class HiloJuego(threading.Thread):
         print(direccion)
         self.sockMulticast = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         self.sockMulticast.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-        self.sockMulticast.bind(('192.168.0.3', 3001))
-        membership = struct.pack("4sl", socket.inet_aton(direccion), socket.INADDR_ANY)
+        self.sockMulticast.bind((self.bindDir, 3001))
+        #membership = struct.pack("4sl", socket.inet_aton(direccion), socket.INADDR_ANY)
+        membership = socket.inet_aton(direccion) + socket.inet_aton(self.bindDir)
         self.sockMulticast.setsockopt(socket.IPPROTO_IP, socket.IP_ADD_MEMBERSHIP, membership)
 
     def escucharMulticast(self):

@@ -63,7 +63,7 @@ class HiloJuego(threading.Thread):
                         self.mainWindow.inicializarJugador.emit(respJson, mensaje_json['nombre_jugador'])
 
                         tiempo_comienzo = time.time()
-                        if len(self.jugadores) == 2:
+                        if len(self.jugadores) == 1:
                             countdown = True
             except (socket.timeout, ValueError):
                 pass
@@ -81,7 +81,7 @@ class HiloJuego(threading.Thread):
 
     def iniciarjuego(self):
         print("Iniciando Partida")
-        self.ronda = 1;
+        self.ronda = 0
         mensajeJuego = {
             'identificador': self.identificadorProtocolo,
             'tipo': 0,
@@ -93,6 +93,7 @@ class HiloJuego(threading.Thread):
         time.sleep(2)
         contadorPuntos = 0
         while contadorPuntos < 100:
+            self.ronda += 1
             print("Iniciando Ronda #{}".format(self.ronda))
             mensajeJuego = {
                 'identificador': self.identificadorProtocolo,
@@ -118,7 +119,10 @@ class HiloJuego(threading.Thread):
             tableroCola = []
             jugando = True
             self.enviarMulticast(mensajeJuego)
+
+            #llamada a interfaz gráfica
             self.mainWindow.procesarJugada.emit(mensajeJuego)
+
             time.sleep(2)
             while jugando:
                 evento_pasado = self.esperarYrealizarJugada(jugadorTurno, tableroCola)
@@ -157,7 +161,7 @@ class HiloJuego(threading.Thread):
                 self.mainWindow.procesarJugada.emit(mensajeJuego)
                 self.enviarMulticast(mensajeJuego)
 
-            time.sleep(2)
+            time.sleep(4)
         mensajeJuego = {
             'identificador': self.identificadorProtocolo,
             'jugador': jugadorGanador.idenJugador,
@@ -175,6 +179,7 @@ class HiloJuego(threading.Thread):
             jugador.fichas = self.fichasRonda.repartirFichas()
         for jugador in self.jugadores:
             men = jugador.enviarFicha(self.identificadorProtocolo)
+
             #llamada a interfaz gráfica
             self.mainWindow.ponerManoJugador.emit(men, jugador.idenJugador)
 

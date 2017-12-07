@@ -149,7 +149,7 @@ class HiloJuego(threading.Thread):
                                     # *******************************  OTRO  ***************************************
                                     else:
                                         print('juega otro')
-                                        elif mensaje_json['tipo'] == 4:
+                                        if mensaje_json['tipo'] == 4:
                                             self.ronda = self.ronda + 1
                                             print('...Ronda Finalizada...')
                                             print('No ganaste, tal vez la próxima')
@@ -200,7 +200,7 @@ class HiloJuego(threading.Thread):
 
     def jugar(self):
         f = fi = None
-        if punta_uno == -1:
+        if len(self.tablero) == 0:
             mayor = -1
             sumaMayor = -1
             for ficha in self.fichas:

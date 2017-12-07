@@ -63,7 +63,7 @@ class HiloJuego(threading.Thread):
                         self.mainWindow.inicializarJugador.emit(respJson, mensaje_json['nombre_jugador'])
 
                         tiempo_comienzo = time.time()
-                        if len(self.jugadores) == 1:
+                        if len(self.jugadores) == 2:
                             countdown = True
             except (socket.timeout, ValueError):
                 pass

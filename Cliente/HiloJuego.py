@@ -82,6 +82,7 @@ class HiloJuego(threading.Thread):
                                 self.mainWindow.ponerManoJugador.emit(mensaje_fichas, self.miIdentificador)
 
                                 for jugador in self.jugadores:
+                                    #llamada a interfaz gráfica
                                     self.mainWindow.ponerManoJugador.emit(None, jugador['identificador'])
 
                             terminoRonda = False
@@ -94,21 +95,18 @@ class HiloJuego(threading.Thread):
                                     #llamada a interfaz gráfica
                                     self.mainWindow.procesarJugada.emit(mensaje_json)
 
+                                    # **************************** Jugada anterior ********************************
+                                    if 'evento_pasado' in mensaje_json:
+                                        if all(campo in mensaje_json['evento_pasado'] for campo in ('tipo', 'jugador', 'punta', 'ficha')):
+                                            if mensaje_json['evento_pasado']['tipo'] == 0:
+                                                if all(entero in mensaje_json['evento_pasado']['ficha'] for entero in ('entero_uno', 'entero_dos')):
+                                                    self.guardarJugada(mensaje_json['evento_pasado']['ficha']['entero_uno'], mensaje_json['evento_pasado']['ficha']['entero_dos'], mensaje_json['evento_pasado']['punta'])
+
                                     # *********************************  YO  **************************************
                                     if mensaje_json['jugador'] == self.miIdentificador:
                                         print('juego yo')
                                         if mensaje_json['tipo'] == 3 and 'punta_uno' in mensaje_json and 'punta_dos' in mensaje_json:       
-                                            if mensaje_json['punta_uno'] == -1 and mensaje_json['punta_dos'] == -1:
-                                                ficha, punta = self.jugar(-1,-1, None)
-                                            elif 'evento_pasado' in mensaje_json:
-                                                evento_pasado = mensaje_json['evento_pasado']
-                                                if 'tipo' in evento_pasado and 'jugador' in evento_pasado and 'punta' in evento_pasado:
-                                                    if 'ficha' in evento_pasado:
-                                                        fichaJugada = evento_pasado['ficha']
-                                                        if 'entero_uno' in fichaJugada and 'entero_dos' in fichaJugada:
-                                                            print('guarda mio')
-                                                            self.guardarJugada(fichaJugada['entero_uno'], fichaJugada['entero_dos'],evento_pasado['punta'])
-                                                            ficha, punta = self.jugar(mensaje_json['punta_uno'], mensaje_json['punta_dos'], mensaje_json['evento_pasado'])             
+                                            ficha, punta = self.jugar()
                                             if ficha is None:
                                                 mensaje_json = {
                                                     'identificador': self.identificadorProtocolo,
@@ -209,11 +207,11 @@ class HiloJuego(threading.Thread):
         self.banderaBuscarServer = False
         self.mesa = serverInfo
 
-    def jugar(self, punta_uno, punta_dos, evento_pasado):
+    def jugar(self):
         f = fi = None
         if punta_uno == -1:
-            mayor = 0
-            sumaMayor = 0
+            mayor = -1
+            sumaMayor = -1
             for ficha in self.fichas:
                 if ficha.entero_uno == ficha.entero_dos and ficha.entero_uno > mayor:
                     mayor = ficha.entero_uno
@@ -224,11 +222,11 @@ class HiloJuego(threading.Thread):
             if f:
                 print(f.entero_uno, f.entero_dos)
                 return f, False
-            else:
+            elif fi:
                 print(fi.entero_uno, fi.entero_dos)
                 return fi, False
         else:
-            sumaMayor = 0
+            sumaMayor = -1
             fichaMayor = None
             punta =  None
             for ficha in self.fichas:

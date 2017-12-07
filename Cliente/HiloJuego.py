@@ -101,6 +101,8 @@ class HiloJuego(threading.Thread):
                                             if mensaje_json['evento_pasado']['tipo'] == 0:
                                                 if all(entero in mensaje_json['evento_pasado']['ficha'] for entero in ('entero_uno', 'entero_dos')):
                                                     self.guardarJugada(mensaje_json['evento_pasado']['ficha']['entero_uno'], mensaje_json['evento_pasado']['ficha']['entero_dos'], mensaje_json['evento_pasado']['punta'])
+                                                    if mensaje_json['evento_pasado']['jugador'] == self.miIdentificador:
+                                                        self.eliminarFicha(mensaje_json['evento_pasado']['ficha'])
 
                                     # *********************************  YO  **************************************
                                     if mensaje_json['jugador'] == self.miIdentificador:
@@ -123,8 +125,6 @@ class HiloJuego(threading.Thread):
                                                     },
                                                     'punta': punta
                                                 }
-                                                self.fichas.remove(ficha)
-
                                             print(mensaje_json)
                                             self.enviarTCP(mensaje_json)
                                             print('se envia tcp')
@@ -149,15 +149,6 @@ class HiloJuego(threading.Thread):
                                     # *******************************  OTRO  ***************************************
                                     else:
                                         print('juega otro')
-                                        if mensaje_json['tipo'] == 3 and 'punta_uno' in mensaje_json and 'punta_dos' in mensaje_json:            
-                                            if mensaje_json['punta_uno'] != -1 and mensaje_json['punta_dos'] != -1 and 'evento_pasado' in mensaje_json:
-                                                evento_pasado = mensaje_json['evento_pasado']
-                                                if 'tipo' in evento_pasado and 'jugador' in evento_pasado and 'punta' in evento_pasado:
-                                                    if evento_pasado['tipo'] == 0 and 'ficha' in evento_pasado:
-                                                        fichaJugada = evento_pasado['ficha']
-                                                        if 'entero_uno' in fichaJugada and 'entero_dos' in fichaJugada:
-                                                            print('guarda otro')
-                                                            self.guardarJugada(fichaJugada['entero_uno'], fichaJugada['entero_dos'],evento_pasado['punta'])
                                         elif mensaje_json['tipo'] == 4:
                                             self.ronda = self.ronda + 1
                                             print('...Ronda Finalizada...')
@@ -276,6 +267,16 @@ class HiloJuego(threading.Thread):
         for ficha in f:
             print(ficha['entero_uno'], ficha['entero_dos'])
             self.fichas.append(Ficha(ficha['entero_uno'], ficha['entero_dos'], ficha['token']))
+
+    def eliminarFicha(self, ficha_jugada):
+        f = None
+        for ficha in self.fichas:
+            if (ficha.entero_uno == ficha_jugada['entero_uno'] and ficha.entero_dos == ficha_jugada['entero_dos']) \
+               or (ficha.entero_uno == ficha_jugada['entero_dos'] and ficha.entero_dos == ficha_jugada['entero_uno']):
+                    f = ficha
+                    break
+        if f:
+            self.fichas.remove(f)
 
     def iniciarUDP(self):
         UDPendpoint = ('0.0.0.0', 3001)

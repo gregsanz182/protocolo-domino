@@ -10,15 +10,12 @@ from Cliente.Ficha import Ficha
 
 class HiloJuego(threading.Thread):
 
+    #Direccion Bind (Colocar solo si es windows, en linux debería ser 0.0.0.0)
+    direccionBind = '0.0.0.0'
+
     def __init__(self, mainWindow, nombre):
         super().__init__()
-
-        """Si tienes problemas para recibir los mensajes multicast o Windows arroja un error de dirección no
-        permitida para la direccion multicast, coloca la ip de la interfaz por donde escuchará el programa.
-        Normalmente esta suele ser la principal o denominada "Ethernet" en los adaptadores de red"""
-        
-        self.bindDir = '192.168.0.3' #Direccion Bind (Colocar solo si es windows)
-
+        self.bindDir = self.direccionBind #Direccion Bind (Colocar solo si es windows)
         self.mainWindow = mainWindow
         self.nombre = nombre
         self.identificadorProtocolo = 'DOMINOCOMUNICACIONESI'

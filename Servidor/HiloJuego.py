@@ -177,11 +177,11 @@ class HiloJuego(threading.Thread):
 
             time.sleep(4)
             jugador, mayoriaPuntos = self.jugadorConMasPuntos()
-        mensajeJuego = {
+        jugador = {
             'identificador': self.identificadorProtocolo,
-            'jugador': jugadorGanador.idenJugador,
+            'jugador': jugador.idenJugador,
             'tipo': 5,
-            'razon': razon
+            'razon': "Alcanzó los {0} puntos".format(self.puntosParaPartida)
         }
         puntuacion_general = []
         for jugador in self.jugadores:

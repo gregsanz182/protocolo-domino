@@ -170,7 +170,13 @@ class HiloJuego(threading.Thread):
         }
         puntuacion_general = []
         for jugador in self.jugadores:
-            puntuacion_general.append({'jugador': jugador['idenJugador'], 'puntuacion': self.calcularPuntuacion(jugador)})
+            puntuacion_general.append({'jugador': jugador.idenJugador, 'puntuacion': jugador.puntos})
+        mensajeJuego['puntuacion_general'] = puntuacion_general
+
+        #llamada a interfaz gráfica
+        self.mainWindow.procesarJugada.emit(mensajeJuego)
+
+        self.enviarMulticast(mensajeJuego)
 
             
     def repartirFichasYEnviar(self):

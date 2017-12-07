@@ -105,7 +105,8 @@ class MainWindow(QMainWindow):
             self.jugadores[mensaje_dict['jugador']].cambiarPuntuacion(mensaje_dict['puntuacion'])
             self.jugadores[mensaje_dict['jugador']].cambiarEstado(PanelJugador.gano)
             self.labelMensaje.setText('"{0}" ha ganado la ronda #{1}\nPor: {2}'.format(self.jugadores[mensaje_dict['jugador']].nombre, self.rondaActual, mensaje_dict['razon']))
-
+        if mensaje_dict['tipo'] == 5:
+            self.labelMensaje.setText("{0} HA GANADO LA PARTIDA".format(self.jugadores[mensaje_dict['jugador']].nombre))
 
     def cambiarRondaSlot(self, mensaje_dict):
         self.labelRonda.setText("Ronda #{}".format(mensaje_dict['ronda']))

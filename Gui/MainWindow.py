@@ -77,6 +77,7 @@ class MainWindow(QMainWindow):
         for jugador in mensaje_dict["jugadores"]:
             if jugador['identificador'] not in iter(self.jugadores.keys()):
                 jug = PanelJugador(jugador.get('nombre', "Jugador #{}".format(len(self.jugadores)+1)), len(self.jugadores), self)
+                jug.show()
                 self.jugadores[jugador['identificador']] = jug
 
     def ponerManoJugadorSlot(self, mensaje_dict, idenJugador):

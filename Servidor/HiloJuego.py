@@ -12,15 +12,29 @@ from Servidor.Fichas import Fichas
 
 class HiloJuego(threading.Thread):
 
+    #Cantidad de jugadores minimos
+    cantJugadoresMinimo = 1
+
+    #Cantidad de puntos para ganar partida
+    puntosParaPartida = 10
+
+    #Tiempo para comenzar partida
+    tiempoComenzarPartida = 15
+
+    #Direccion para el multicast
+    multicastendpoint = ('225.145.80.15', 3001)
+
+    #Nombre del identificador general
+    identificadorProtocolo = 'DOMINOCOMUNICACIONESI'
+
+
     def __init__(self, nombre, mainWindow):
         super().__init__()
         self.mainWindow = mainWindow
         self.nombreMesa = nombre
-        self.identificadorProtocolo = 'DOMINOCOMUNICACIONESI'
         self.TCPendpoint = ('0.0.0.0', 3001)
         self.sockTCP = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.sockTCP.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-        self.multicastendpoint = ('225.145.80.15', 3001)
         self.sockMulticast = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         self.sockMulticast.setsockopt(socket.IPPROTO_IP, socket.IP_MULTICAST_TTL, struct.pack('b', 1))
         self.jsonMulticast = {
@@ -43,7 +57,7 @@ class HiloJuego(threading.Thread):
         self.sockTCP.settimeout(5)
         tiempo_comienzo = time.time()
         countdown = False
-        while (time.time() - tiempo_comienzo) < 15 and len(self.jugadores) < 4:
+        while (time.time() - tiempo_comienzo) < self.tiempoComenzarPartida and len(self.jugadores) < 4:
             try:
                 print('Esperando conexiones de los clientes')
                 conexion, direccion_cliente = self.sockTCP.accept()
@@ -63,7 +77,7 @@ class HiloJuego(threading.Thread):
                         self.mainWindow.inicializarJugador.emit(respJson, mensaje_json['nombre_jugador'])
 
                         tiempo_comienzo = time.time()
-                        if len(self.jugadores) == 2:
+                        if len(self.jugadores) == self.cantJugadoresMinimo:
                             countdown = True
             except (socket.timeout, ValueError):
                 pass
@@ -92,7 +106,7 @@ class HiloJuego(threading.Thread):
         self.enviarMulticast(mensajeJuego)
         time.sleep(2)
         contadorPuntos = 0
-        while contadorPuntos < 100:
+        while contadorPuntos < self.puntosParaPartida:
             self.ronda += 1
             print("Iniciando Ronda #{}".format(self.ronda))
             mensajeJuego = {

@@ -16,7 +16,8 @@ class HiloJuego(threading.Thread):
         """Si tienes problemas para recibir los mensajes multicast o Windows arroja un error de dirección no
         permitida para la direccion multicast, coloca la ip de la interfaz por donde escuchará el programa.
         Normalmente esta suele ser la principal o denominada "Ethernet" en los adaptadores de red"""
-        self.bindDir = '0.0.0.0' #Direccion Bind (Colocar solo si es windows)
+        
+        self.bindDir = '192.168.0.3' #Direccion Bind (Colocar solo si es windows)
 
         self.mainWindow = mainWindow
         self.nombre = nombre

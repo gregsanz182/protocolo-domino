@@ -13,7 +13,7 @@ from Servidor.Fichas import Fichas
 class HiloJuego(threading.Thread):
 
     #Cantidad de jugadores minimos
-    cantJugadoresMinimo = 1
+    cantJugadoresMinimo = 2
 
     #Cantidad de puntos para ganar partida
     puntosParaPartida = 10
@@ -105,8 +105,8 @@ class HiloJuego(threading.Thread):
             mensajeJuego['jugadores'].append({'identificador':jugador.idenJugador,'nombre':jugador.nombre})
         self.enviarMulticast(mensajeJuego)
         time.sleep(2)
-        contadorPuntos = 0
-        while contadorPuntos < self.puntosParaPartida:
+        mayoriaPuntos = -1
+        while mayoriaPuntos < self.puntosParaPartida:
             self.ronda += 1
             print("Iniciando Ronda #{}".format(self.ronda))
             mensajeJuego = {
@@ -176,6 +176,7 @@ class HiloJuego(threading.Thread):
                 self.enviarMulticast(mensajeJuego)
 
             time.sleep(4)
+            jugador, mayoriaPuntos = self.jugadorConMasPuntos()
         mensajeJuego = {
             'identificador': self.identificadorProtocolo,
             'jugador': jugadorGanador.idenJugador,
@@ -321,6 +322,15 @@ class HiloJuego(threading.Thread):
         
         jugador.aumentarPuntos(suma)
         return suma
+
+    def jugadorConMasPuntos(self):
+        jug = None
+        pts = -1
+        for jugador in self.jugadores:
+            if jugador.puntos > pts:
+                jug = jugador
+                pts = jugador.puntos
+        return jug, pts
 
     def cerrarTodo(self):
         if self.disp.is_alive:

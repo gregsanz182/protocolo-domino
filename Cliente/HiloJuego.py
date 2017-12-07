@@ -11,11 +11,11 @@ from Cliente.Ficha import Ficha
 class HiloJuego(threading.Thread):
 
     #Direccion Bind (Colocar solo si es windows, en linux debería ser 0.0.0.0)
-    direccionBind = '0.0.0.0'
+    direccionBind = '192.168.0.3'
 
     def __init__(self, mainWindow, nombre):
         super().__init__()
-        self.bindDir = self.direccionBind #Direccion Bind (Colocar solo si es windows)
+        self.bindDir = self.direccionBind
         self.mainWindow = mainWindow
         self.nombre = nombre
         self.identificadorProtocolo = 'DOMINOCOMUNICACIONESI'
